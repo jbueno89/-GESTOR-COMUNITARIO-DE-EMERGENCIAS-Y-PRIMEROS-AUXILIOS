@@ -18,6 +18,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
+import java.awt.GridLayout;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 public class PanelPrincipal extends JFrame {
 
@@ -28,6 +32,9 @@ public class PanelPrincipal extends JFrame {
 	private int mouseX, mouseY;
     private CardLayout cardLayout;
     private JTextField tfBuscarIncidentes;
+    private JTable tableIncidentes;
+    private JTextField tfBuscarNombreSuminis;
+    private JTable tableSuministros;
 
 	/**
 	 * Launch the application.
@@ -76,30 +83,34 @@ public class PanelPrincipal extends JFrame {
 		panelBarra.setLayout(null);
 		
 		JLabel lblTituloLogo = new JLabel("New label");
-		lblTituloLogo.setBounds(10, 11, 400, 29);
+		lblTituloLogo.setBounds(10, 9, 277, 23);
         lblTituloLogo.setFont(new Font("SansSerif", Font.BOLD, 14));
 		panelBarra.add(lblTituloLogo);
         
         // Lógica de Minimizar
 		JButton btnMinimizar = new JButton("-");
+		btnMinimizar.setBounds(905, 3, 41, 31);
 		btnMinimizar.setFont(new Font("SansSerif", Font.BOLD, 20));
 		btnMinimizar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
                 setState(JFrame.ICONIFIED);
 			}
 		});
-		btnMinimizar.setBounds(921, 0, 40, 34);
 		panelBarra.add(btnMinimizar);
 		
         // Lógica de Cerrar
 		JButton btnCerrar = new JButton("x");
+		btnCerrar.setBounds(949, 3, 41, 31);
 		btnCerrar.setFont(new Font("SansSerif", Font.BOLD, 15));
-		btnCerrar.setBounds(960, 0, 40, 34);
 		btnCerrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
                 System.exit(0);
 			}
 		});
+		
+		JLabel label_1 = new JLabel("");
+		label_1.setBounds(360, 0, 106, 13);
+		panelBarra.add(label_1);
 		panelBarra.add(btnCerrar);
         
         // Lógica de Arrastre (Mover la ventana)
@@ -140,13 +151,13 @@ public class PanelPrincipal extends JFrame {
 		panelContenido.add(panelIncidentes, "Incidentes"); 
 		panelIncidentes.setLayout(null); 
 		
-		JLabel lblIncidentesActCurso = new JLabel("Incidentes Activos en Curso");
-		lblIncidentesActCurso.setFont(new Font("SansSerif", Font.BOLD, 12));
-		lblIncidentesActCurso.setBounds(20, 11, 301, 25);
-		panelIncidentes.add(lblIncidentesActCurso);
+		JLabel lblTituloIncidentesActCurso = new JLabel("Incidentes Activos en Curso");
+		lblTituloIncidentesActCurso.setFont(new Font("SansSerif", Font.BOLD, 15));
+		lblTituloIncidentesActCurso.setBounds(20, 11, 301, 25);
+		panelIncidentes.add(lblTituloIncidentesActCurso);
 		
-		JLabel lblfiltroIncidentes = new JLabel("Filtrar:");
-		lblfiltroIncidentes.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		JLabel lblfiltroIncidentes = new JLabel("Filtrar :");
+		lblfiltroIncidentes.setFont(new Font("SansSerif", Font.PLAIN, 13));
 		lblfiltroIncidentes.setBounds(20, 50, 51, 25);
 		panelIncidentes.add(lblfiltroIncidentes);
 		
@@ -170,9 +181,91 @@ public class PanelPrincipal extends JFrame {
 		btnCrearIncidente.setBounds(670, 50, 121, 25);
 		panelIncidentes.add(btnCrearIncidente);
 		
+		JScrollPane spIncidentes = new JScrollPane();
+		spIncidentes.setBounds(20, 90, 771, 480);
+		panelIncidentes.add(spIncidentes);
+		
+		tableIncidentes = new JTable();
+		tableIncidentes.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"ID", "Tipo", "Prioridad", "Ubicaci\u00F3n", "Tiempo Activo", "Brigadista Asignado"
+			}
+		));
+		tableIncidentes.getColumnModel().getColumn(4).setPreferredWidth(87);
+		tableIncidentes.getColumnModel().getColumn(5).setPreferredWidth(117);
+		tableIncidentes.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		spIncidentes.setViewportView(tableIncidentes);
+		
+		JButton btnVerDetallesInciden = new JButton("Ver Detalles");
+		btnVerDetallesInciden.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnVerDetallesInciden.setBounds(20, 581, 150, 28);
+		panelIncidentes.add(btnVerDetallesInciden);
+		
+		JButton btnMarcaResueltoIncide = new JButton("Marcar como Resuelto");
+		btnMarcaResueltoIncide.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnMarcaResueltoIncide.setBounds(180, 581, 180, 28);
+		panelIncidentes.add(btnMarcaResueltoIncide);
+		
 		JPanel panelInventario = new JPanel();
 		panelContenido.add(panelInventario, "Inventario"); 
 		panelInventario.setLayout(null);
+		
+		JLabel lblTituloInventario = new JLabel("Gestión de Inventario y Suministros");
+		lblTituloInventario.setFont(new Font("SansSerif", Font.BOLD, 15));
+		lblTituloInventario.setBounds(20, 11, 350, 25);
+		panelInventario.add(lblTituloInventario);
+		
+		JLabel lblBuscarInventario = new JLabel("Buscar :");
+		lblBuscarInventario.setFont(new Font("SansSerif", Font.PLAIN, 13));
+		lblBuscarInventario.setBounds(20, 53, 75, 25);
+		panelInventario.add(lblBuscarInventario);
+		
+		tfBuscarNombreSuminis = new JTextField();
+		tfBuscarNombreSuminis.setBounds(95, 53, 250, 25);
+		panelInventario.add(tfBuscarNombreSuminis);
+		tfBuscarNombreSuminis.setColumns(10);
+		
+		JComboBox cbFiltroUbi = new JComboBox();
+		cbFiltroUbi.setBounds(355, 53, 120, 25);
+		panelInventario.add(cbFiltroUbi);
+		
+		JButton btnAñadirSuministro = new JButton("Añadir Stock");
+		btnAñadirSuministro.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnAñadirSuministro.setBounds(520, 53, 120, 25);
+		panelInventario.add(btnAñadirSuministro);
+		
+		JButton btnReporteSuministro = new JButton("Generar Reporte");
+		btnReporteSuministro.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnReporteSuministro.setBounds(650, 53, 141, 25);
+		panelInventario.add(btnReporteSuministro);
+		
+		JScrollPane spSuministros = new JScrollPane();
+		spSuministros.setBounds(20, 89, 771, 480);
+		panelInventario.add(spSuministros);
+		
+		tableSuministros = new JTable();
+		tableSuministros.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"ID", "Suministro", "Stock Actual", "Unidad (Kg/Uni)", "M\u00EDnimo Cr\u00EDtico", "Ubicaci\u00F3n", "Fecha de Caducidad"
+			}
+		));
+		tableSuministros.getColumnModel().getColumn(3).setPreferredWidth(90);
+		tableSuministros.getColumnModel().getColumn(6).setPreferredWidth(116);
+		spSuministros.setViewportView(tableSuministros);
+		
+		JButton btnEditStockSuminis = new JButton("Editar Stock");
+		btnEditStockSuminis.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnEditStockSuminis.setBounds(20, 580, 150, 29);
+		panelInventario.add(btnEditStockSuminis);
+		
+		JButton btnMarcarCriticSuminis = new JButton("Marcar Crítico");
+		btnMarcarCriticSuminis.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnMarcarCriticSuminis.setBounds(180, 580, 150, 29);
+		panelInventario.add(btnMarcarCriticSuminis);
 		
 		JPanel panelBrigadistas = new JPanel();
 		panelContenido.add(panelBrigadistas, "Brigadistas"); 
