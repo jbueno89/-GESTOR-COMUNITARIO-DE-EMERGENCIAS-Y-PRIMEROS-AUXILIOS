@@ -22,6 +22,7 @@ import java.awt.GridLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.DefaultComboBoxModel;
 
 public class PanelPrincipal extends JFrame {
 
@@ -35,6 +36,8 @@ public class PanelPrincipal extends JFrame {
     private JTable tableIncidentes;
     private JTextField tfBuscarNombreSuminis;
     private JTable tableSuministros;
+    private JTextField tfBuscarBrigadistas;
+    private JTable tableBrigadistas;
 
 	/**
 	 * Launch the application.
@@ -168,6 +171,7 @@ public class PanelPrincipal extends JFrame {
 		tfBuscarIncidentes.setColumns(10);
 		
 		JComboBox cbFiltroPrioridad = new JComboBox();
+		cbFiltroPrioridad.setModel(new DefaultComboBoxModel(new String[] {"Prioridad Alta", "Prioridad Media", "Prioridad Baja"}));
 		cbFiltroPrioridad.setFont(new Font("SansSerif", Font.PLAIN, 12));
 		cbFiltroPrioridad.setBounds(291, 50, 120, 25);
 		panelIncidentes.add(cbFiltroPrioridad);
@@ -228,7 +232,9 @@ public class PanelPrincipal extends JFrame {
 		tfBuscarNombreSuminis.setColumns(10);
 		
 		JComboBox cbFiltroUbi = new JComboBox();
-		cbFiltroUbi.setBounds(355, 53, 120, 25);
+		cbFiltroUbi.setModel(new DefaultComboBoxModel(new String[] {"Almacén Principal", "Almacén A", "Almacén B", "Almacén C"}));
+		cbFiltroUbi.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		cbFiltroUbi.setBounds(355, 53, 127, 25);
 		panelInventario.add(cbFiltroUbi);
 		
 		JButton btnAñadirSuministro = new JButton("Añadir Stock");
@@ -270,6 +276,54 @@ public class PanelPrincipal extends JFrame {
 		JPanel panelBrigadistas = new JPanel();
 		panelContenido.add(panelBrigadistas, "Brigadistas"); 
 		panelBrigadistas.setLayout(null);
+		
+		JLabel lblTituloBrigadista = new JLabel("Gestión de Brigadistas y Personal ");
+		lblTituloBrigadista.setFont(new Font("SansSerif", Font.BOLD, 15));
+		lblTituloBrigadista.setBounds(20, 11, 350, 25);
+		panelBrigadistas.add(lblTituloBrigadista);
+		
+		JLabel lblBuscarBrigadistas = new JLabel("Buscar :");
+		lblBuscarBrigadistas.setFont(new Font("SansSerif", Font.PLAIN, 13));
+		lblBuscarBrigadistas.setBounds(20, 50, 75, 25);
+		panelBrigadistas.add(lblBuscarBrigadistas);
+		
+		tfBuscarBrigadistas = new JTextField();
+		tfBuscarBrigadistas.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		tfBuscarBrigadistas.setColumns(10);
+		tfBuscarBrigadistas.setBounds(95, 51, 250, 25);
+		panelBrigadistas.add(tfBuscarBrigadistas);
+		
+		JComboBox cbFiltroEstadoBrig = new JComboBox();
+		cbFiltroEstadoBrig.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		cbFiltroEstadoBrig.setModel(new DefaultComboBoxModel(new String[] {"Libre", "En Servicio", "Descanso"}));
+		cbFiltroEstadoBrig.setToolTipText("");
+		cbFiltroEstadoBrig.setBounds(355, 51, 120, 25);
+		panelBrigadistas.add(cbFiltroEstadoBrig);
+		
+		JButton btnAddBrigadista = new JButton("Añadir Brigadista");
+		btnAddBrigadista.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnAddBrigadista.setBounds(651, 51, 140, 25);
+		panelBrigadistas.add(btnAddBrigadista);
+		
+		JScrollPane spBrigadistas = new JScrollPane();
+		spBrigadistas.setBounds(20, 90, 455, 500);
+		panelBrigadistas.add(spBrigadistas);
+		
+		tableBrigadistas = new JTable();
+		tableBrigadistas.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"ID", "Nombre", "Estado", "Especialidad", "Tel\u00E9fono"
+			}
+		));
+		tableBrigadistas.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		spBrigadistas.setViewportView(tableBrigadistas);
+		
+		JPanel panel = new JPanel();
+		panel.setBounds(490, 90, 290, 500);
+		panelBrigadistas.add(panel);
+		panel.setLayout(null);
 		
 		JPanel panelGuiasPAuxilios = new JPanel();
 		panelContenido.add(panelGuiasPAuxilios, "GuiasPAuxilios"); 
