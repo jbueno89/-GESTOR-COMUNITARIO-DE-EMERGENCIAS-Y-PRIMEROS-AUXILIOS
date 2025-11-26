@@ -32,6 +32,9 @@ import java.util.Date;
 import javax.swing.text.MaskFormatter;
 import javax.swing.JFormattedTextField;
 import javax.swing.border.LineBorder;
+import java.net.URL; // Necesario para cargar recursos
+import javax.swing.ImageIcon; // Necesario para el logo
+import java.awt.Image; // Necesario para escalar el logo
 
 public class PanelPrincipal extends JFrame {
 
@@ -107,10 +110,40 @@ public class PanelPrincipal extends JFrame {
 		panelFondo.add(panelBarra);
 		panelBarra.setLayout(null);
 
-		JLabel lblTituloLogo = new JLabel("New label");
-		lblTituloLogo.setBounds(10, 9, 277, 23);
-		lblTituloLogo.setFont(new Font("SansSerif", Font.BOLD, 14));
-		panelBarra.add(lblTituloLogo);
+		// -------------------------------------------------------------------------
+		// LÓGICA DEL LOGO: Carga Logo.png y escalado dinámico al tamaño de lblLogo
+        // -------------------------------------------------------------------------
+		JLabel lblLogo = new JLabel("");
+		final int LOGO_X = 6;
+		final int LOGO_Y = 2;
+		final int LOGO_WIDTH = 50;
+		final int LOGO_HEIGHT = 37;
+		
+		lblLogo.setBounds(6, 2, 50, 37);
+		lblLogo.setFont(new Font("SansSerif", Font.BOLD, 14));
+		panelBarra.add(lblLogo);
+		
+		String logoPath = "recursos/Logo.png";
+		try {
+		    URL logoURL = VentanaInicio.class.getResource(logoPath);
+		    if (logoURL != null) {
+		        ImageIcon originalIcon = new ImageIcon(logoURL);
+		        Image image = originalIcon.getImage();
+		        // Escalamos la imagen al tamaño actual del JLabel
+		        Image scaledImage = image.getScaledInstance(LOGO_WIDTH, LOGO_HEIGHT, Image.SCALE_SMOOTH);
+		        lblLogo.setIcon(new ImageIcon(scaledImage));
+		    } else {
+		        // Fallback si la imagen no se carga
+		        lblLogo.setText("I"); 
+		        lblLogo.setFont(new Font("SansSerif", Font.BOLD, 20));
+		    }
+		} catch (Exception e) {
+		    System.err.println("Error al cargar el logo en PanelPrincipal: vista/" + logoPath);
+		    lblLogo.setText("I");
+		}
+		// -------------------------------------------------------------------------
+		// FIN LÓGICA DEL LOGO
+        // -------------------------------------------------------------------------
 
 		// Lógica de Minimizar
 		JButton btnMinimizar = new JButton("-");
@@ -132,11 +165,12 @@ public class PanelPrincipal extends JFrame {
 				System.exit(0);
 			}
 		});
-
-		JLabel label_1 = new JLabel("");
-		label_1.setBounds(360, 0, 106, 13);
-		panelBarra.add(label_1);
 		panelBarra.add(btnCerrar);
+		
+		JLabel lblTitulo = new JLabel("Selfsecurity\r\n");
+		lblTitulo.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 20));
+		lblTitulo.setBounds(49, 9, 128, 23);
+		panelBarra.add(lblTitulo);
 
 		// Lógica de Arrastre (Mover la ventana)
 		panelBarra.addMouseListener(new MouseAdapter() {
@@ -477,7 +511,7 @@ public class PanelPrincipal extends JFrame {
 		panelPeriodoTipoReportes.add(lblReporteFechaFin);
 
 		// ************************************************************
-		// [CÓDIGO AÑADIDO] JFormattedTextFields con máscara para fechas
+		// [CÓDIGO MANTENIDO] JFormattedTextFields con máscara para fechas
 		// ************************************************************
 		try {
 			MaskFormatter mask = new MaskFormatter("##/##/####"); // DD/MM/AAAA
@@ -602,7 +636,7 @@ public class PanelPrincipal extends JFrame {
 		panelFooter.add(lblVersionFooter);
 
 		// ************************************************************
-		// [FUNCIONALIDAD AÑADIDA] Timer para simular sincronización en el Footer
+		// [FUNCIONALIDAD MANTENIDA] Timer para simular sincronización en el Footer
 		// ************************************************************
 		SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
