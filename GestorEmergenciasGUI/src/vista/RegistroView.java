@@ -1,3 +1,11 @@
+/**
+ * ***************************************************************
+ * GRUPO 10
+ * GESTOR COMUNITARIO DE EMERGENCIAS Y PRIMEROS AUXILIOS
+ * Jose Miguel Bueno Martinez - 20251020093
+ * Anyelo Esteban Casas Zapata - 20251020106
+ * ***************************************************************
+ */
 package vista;
 
 import javax.swing.JFrame;
@@ -17,56 +25,57 @@ import java.awt.Color;
 import javax.swing.SwingConstants;
 import javax.swing.BorderFactory;
 
-// IMPORTACIONES NECESARIAS PARA LA CONEXIÓN
+// IMPORTACIONES DE LA CAPA MODELO (LÓGICA)
 import modelo.GestorUsuarios;
 import modelo.Usuario;
 
+/**
+ * Ventana para el registro de nuevos usuarios en el sistema.
+ * Forma parte de la **Capa de Interfaz Gráfica (GUI)** y demuestra
+ * la **Arquitectura por Capas** al delegar la persistencia de datos
+ * al GestorUsuarios (Capa Lógica).
+ * @author Jose Miguel Bueno Martinez
+ * @author Anyelo Esteban Casas Zapata
+ */
 public class RegistroView extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
     
-    // Campos de formulario (pueden ser private)
+    // Atributos de la GUI (se renombró pfContrasena para convención Java)
     private JTextField tfNombre;
     private JTextField tfUsuario;
-    private JPasswordField pfContraseña;
-    private JPasswordField pfConfirmarContraseña;
+    private JPasswordField pfContrasena;
+    private JPasswordField pfConfirmarContrasena;
     private JComboBox<String> cbRol;
     
-    // --- COLORES DE ESTILO CONSISTENTE (static final) ---
+    // --- COLORES DE ESTILO CONSISTENTE ---
     private static final Color COLOR_PRIMARIO = new Color(26, 75, 140);   
     private static final Color COLOR_ACCENTO_SUCCESS = new Color(34, 139, 34); 
     private static final Color COLOR_ACCENTO_LINK = new Color(0, 102, 204); 
     private static final Color COLOR_FONDO_CLARO = new Color(245, 245, 245); 
     private static final Color COLOR_PANEL_BLANCO = Color.WHITE; 
     
-    // Dependencias
+    // Dependencias de la Capa de Lógica y Vista
     private GestorUsuarios gestorUsuarios; 
-    private LoginView loginFrame; 
+    private JFrame loginFrame; // Uso JFrame para generalizar, aunque se espera VentanaLogin
 
     /**
-     * Launch the application (Método main solo como ejemplo de ejecución).
-     * En una aplicación real, esta vista debe ser llamada desde el Login.
+     * Constructor principal de la vista de registro.
+     * @param loginFrame Referencia a la ventana de Login para poder volver.
+     * @param gestorUsuarios Instancia del GestorUsuarios para registrar los datos.
      */
-    public static void main(String[] args) {
-        // En una aplicación real, se iniciaría el Login, no el Registro directamente.
-        // Aquí se mantiene la estructura estándar del main.
-    }
-    
-    /**
-     * CONSTRUCTOR PRINCIPAL: Inicializa la vista y recibe las dependencias.
-     * @param loginFrame Referencia al LoginView (para volver).
-     * @param gestorUsuarios Instancia del GestorUsuarios (para guardar datos).
-     */
-    public RegistroView(LoginView loginFrame, GestorUsuarios gestorUsuarios) {
-        this.loginFrame = loginFrame; // Referencia al Login
-        this.gestorUsuarios = gestorUsuarios; // Referencia al Gestor
+    public RegistroView(JFrame loginFrame, GestorUsuarios gestorUsuarios) {
+        // Se cambió el tipo del parámetro a JFrame para ser más flexible, 
+        // ya que LoginView extiende JFrame.
+        this.loginFrame = loginFrame; 
+        this.gestorUsuarios = gestorUsuarios; 
 
         inicializarComponentes();
     }
     
     /**
-     * Inicializa y configura todos los componentes de la interfaz gráfica.
+     * Inicializa y configura todos los componentes de la interfaz gráfica (GUI).
      */
     private void inicializarComponentes() {
         setTitle("Sistema de Gestión de Emergencias - Registro de Nuevo Usuario");
@@ -135,28 +144,28 @@ public class RegistroView extends JFrame {
         tfUsuario.setColumns(10);
         
         // --- Contraseña ---
-        JLabel lblContraseña = new JLabel("Contraseña:");
-        lblContraseña.setFont(new Font("SansSerif", Font.BOLD, 12));
-        lblContraseña.setForeground(COLOR_PRIMARIO);
-        lblContraseña.setBounds(xLabel, yStart + 2 * yOffset, 150, 20);
-        contentPane.add(lblContraseña);
+        JLabel lblContrasenaLabel = new JLabel("Contraseña:");
+        lblContrasenaLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+        lblContrasenaLabel.setForeground(COLOR_PRIMARIO);
+        lblContrasenaLabel.setBounds(xLabel, yStart + 2 * yOffset, 150, 20);
+        contentPane.add(lblContrasenaLabel);
 
-        pfContraseña = new JPasswordField();
-        pfContraseña.setBounds(xField, yStart + 2 * yOffset - 5, fieldWidth, 35);
-        pfContraseña.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-        contentPane.add(pfContraseña);
+        pfContrasena = new JPasswordField();
+        pfContrasena.setBounds(xField, yStart + 2 * yOffset - 5, fieldWidth, 35);
+        pfContrasena.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+        contentPane.add(pfContrasena);
         
         // --- Confirmar Contraseña ---
-        JLabel lblConfirmarContraseña = new JLabel("Confirmar Contraseña:");
-        lblConfirmarContraseña.setFont(new Font("SansSerif", Font.BOLD, 12));
-        lblConfirmarContraseña.setForeground(COLOR_PRIMARIO);
-        lblConfirmarContraseña.setBounds(xLabel, yStart + 3 * yOffset, 150, 20);
-        contentPane.add(lblConfirmarContraseña);
+        JLabel lblConfirmarContrasena = new JLabel("Confirmar Contraseña:");
+        lblConfirmarContrasena.setFont(new Font("SansSerif", Font.BOLD, 12));
+        lblConfirmarContrasena.setForeground(COLOR_PRIMARIO);
+        lblConfirmarContrasena.setBounds(xLabel, yStart + 3 * yOffset, 150, 20);
+        contentPane.add(lblConfirmarContrasena);
 
-        pfConfirmarContraseña = new JPasswordField();
-        pfConfirmarContraseña.setBounds(xField, yStart + 3 * yOffset - 5, fieldWidth, 35);
-        pfConfirmarContraseña.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-        contentPane.add(pfConfirmarContraseña);
+        pfConfirmarContrasena = new JPasswordField();
+        pfConfirmarContrasena.setBounds(xField, yStart + 3 * yOffset - 5, fieldWidth, 35);
+        pfConfirmarContrasena.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+        contentPane.add(pfConfirmarContrasena);
         
         // --- Rol (Tipo de Usuario) ---
         JLabel lblRol = new JLabel("Rol (Tipo de Usuario):");
@@ -166,7 +175,7 @@ public class RegistroView extends JFrame {
         contentPane.add(lblRol);
 
         cbRol = new JComboBox<>();
-        // Nota: Asegúrate de que los roles aquí sean los mismos que usa GestorUsuarios/Usuario.
+        // Los roles deben coincidir exactamente con los que maneja GestorUsuarios/Usuario
         cbRol.setModel(new DefaultComboBoxModel<>(new String[] {"Residente", "Brigadista"})); 
         cbRol.setFont(new Font("SansSerif", Font.PLAIN, 14));
         cbRol.setBounds(xField, yStart + 4 * yOffset - 5, fieldWidth, 35);
@@ -186,6 +195,10 @@ public class RegistroView extends JFrame {
         btnRegistrar.setFocusPainted(false);
         
         btnRegistrar.addActionListener(new ActionListener() {
+            /**
+             * Maneja el evento de clic del botón Registrar.
+             * @param e El evento de acción.
+             */
             public void actionPerformed(ActionEvent e) {
                 procesarRegistro();
             }
@@ -201,10 +214,16 @@ public class RegistroView extends JFrame {
         btnVolver.setBorderPainted(false); 
         
         btnVolver.addActionListener(new ActionListener() {
+            /**
+             * Maneja el evento de clic del botón Volver.
+             * @param e El evento de acción.
+             */
             public void actionPerformed(ActionEvent e) {
-                // Muestra la ventana de login (que ya existe y contiene el Gestor)
-                loginFrame.setVisible(true); 
-                dispose(); // Cierra esta ventana de registro
+                // Vuelve a mostrar el Login y cierra la ventana actual
+                if (loginFrame != null) {
+                    loginFrame.setVisible(true); 
+                }
+                dispose(); 
             }
         });
         btnVolver.setBounds(90, 540, 300, 20); 
@@ -212,37 +231,40 @@ public class RegistroView extends JFrame {
     }
     
     /**
-     * Valida los campos y REGISTRA el usuario utilizando el GestorUsuarios.
+     * Valida los datos del formulario y llama a la capa de lógica para registrar
+     * el nuevo objeto Usuario. Demuestra el **Manejo de Errores** y la **Creación de Objetos**.
      */
     private void procesarRegistro() {
         String nombre = tfNombre.getText().trim();
         String usuario = tfUsuario.getText().trim();
-        String contraseña = new String(pfContraseña.getPassword());
-        String confirmar = new String(pfConfirmarContraseña.getPassword());
+        String contrasena = new String(pfContrasena.getPassword());
+        String confirmar = new String(pfConfirmarContrasena.getPassword());
         String rol = (String) cbRol.getSelectedItem();
         
-        // 1. VALIDACIONES BÁSICAS
-        if (nombre.isEmpty() || usuario.isEmpty() || contraseña.isEmpty() || confirmar.isEmpty()) {
+        // 1. VALIDACIONES DE LA VISTA (Validación Robusta de Entradas)
+        if (nombre.isEmpty() || usuario.isEmpty() || contrasena.isEmpty() || confirmar.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Todos los campos deben ser completados.", "Error de Registro", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
-        if (!contraseña.equals(confirmar)) {
+        if (!contrasena.equals(confirmar)) {
             JOptionPane.showMessageDialog(this, "Las contraseñas no coinciden.", "Error de Contraseña", JOptionPane.WARNING_MESSAGE);
-            pfContraseña.setText("");
-            pfConfirmarContraseña.setText("");
+            pfContrasena.setText("");
+            pfConfirmarContrasena.setText("");
             return;
         }
         
-        if (contraseña.length() < 5) {
+        if (contrasena.length() < 5) {
             JOptionPane.showMessageDialog(this, "La contraseña debe tener al menos 5 caracteres.", "Error de Contraseña", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // 2. CREACIÓN y REGISTRO DEL USUARIO
+        // 2. LLAMADA A LA CAPA DE LÓGICA (Manejo de Errores)
         try {
-             Usuario nuevoUsuario = new Usuario(nombre, usuario, contraseña, rol);
-             // Llama al método del modelo (GestorUsuarios) para guardar los datos
+             // Creación de Objetos: Se crea la instancia de la clase modelo.
+             Usuario nuevoUsuario = new Usuario(nombre, usuario, contrasena, rol);
+             
+             // Llama al método del GestorUsuarios para persistir los datos
              gestorUsuarios.registrarUsuario(nuevoUsuario); 
 
              // 3. REGISTRO EXITOSO Y VUELTA AL LOGIN
@@ -250,16 +272,15 @@ public class RegistroView extends JFrame {
                  "✅ ¡Registro Exitoso!\nUsuario: " + usuario + "\nAhora puede iniciar sesión.", 
                  "Registro Completo", JOptionPane.INFORMATION_MESSAGE);
             
-             // Vuelve al Login
-             loginFrame.setVisible(true); 
+             // Vuelve al Login y cierra esta ventana (End del Programa para esta vista)
+             if (loginFrame != null) {
+                 loginFrame.setVisible(true); 
+             }
              this.dispose(); 
              
-        } catch (IllegalArgumentException e) {
-            // Manejo de error si el usuario ya existe (asumiendo que GestorUsuarios lanza esta excepción)
-            JOptionPane.showMessageDialog(this, "Error al registrar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-             // Manejo de otros errores no esperados (por ejemplo, problemas de I/O)
-            JOptionPane.showMessageDialog(this, "Error inesperado al registrar: " + e.getMessage(), "Error Grave", JOptionPane.ERROR_MESSAGE);
+            // Captura la excepción lanzada por GestorUsuarios (ej. usuario ya existe, IOException)
+            JOptionPane.showMessageDialog(this, "Error al registrar: " + e.getMessage(), "Error Grave", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

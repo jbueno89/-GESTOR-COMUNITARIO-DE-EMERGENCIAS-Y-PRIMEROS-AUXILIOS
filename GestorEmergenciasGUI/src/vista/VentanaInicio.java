@@ -1,3 +1,11 @@
+/**
+ * ***************************************************************
+ * GRUPO 10
+ * GESTOR COMUNITARIO DE EMERGENCIAS Y PRIMEROS AUXILIOS
+ * Jose Miguel Bueno Martinez - 20251020093
+ * Anyelo Esteban Casas Zapata - 20251020106
+ * ***************************************************************
+ */
 package vista;
 
 import java.awt.EventQueue;
@@ -23,27 +31,30 @@ import javax.swing.BorderFactory;
 // IMPORTACIONES REQUERIDAS para iniciar la lógica de negocio
 import modelo.GestorUsuarios; 
 
+/**
+ * Ventana de inicio o bienvenida (Splash Screen) de la aplicación.
+ * Es el primer punto de contacto visual y se encarga de iniciar la 
+ * **Capa de Lógica (GestorUsuarios)** antes de pasar al login.
+ * @author Jose Miguel Bueno Martinez
+ * @author Anyelo Esteban Casas Zapata
+ */
 public class VentanaInicio extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
     
-    // --- COLORES DE ESTILO CONSISTENTE (static final) ---
-    private static final Color COLOR_PRIMARIO = new Color(26, 75, 140);   // Azul Profundo
-    private static final Color COLOR_ACCENTO = new Color(217, 0, 29);    // Rojo Brillante
-    private static final Color COLOR_FONDO_CLARO = new Color(245, 245, 245); // Gris Claro (fondo principal)
-    private static final Color COLOR_PANEL_BLANCO = Color.WHITE; // Fondo de paneles
-    // --- FIN COLORES ---
+    // --- COLORES DE ESTILO CONSISTENTE (Atributos finales) ---
+    private static final Color COLOR_PRIMARIO = new Color(26, 75, 140);   
+    private static final Color COLOR_ACCENTO = new Color(217, 0, 29);    
+    private static final Color COLOR_FONDO_CLARO = new Color(245, 245, 245); 
+    private static final Color COLOR_PANEL_BLANCO = Color.WHITE; 
     
-	/**
-	 * Launch the application.
-	 */
+    // Método main mantenido solo para pruebas iniciales, la AppPrincipal lo invoca
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					VentanaInicio frame = new VentanaInicio();
-                    // Centrar la ventana al iniciar
                     frame.setLocationRelativeTo(null);
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -54,14 +65,14 @@ public class VentanaInicio extends JFrame {
 	}
 
 	/**
-	 * Create the frame.
+	 * Constructor principal de la ventana.
 	 */
 	public VentanaInicio() {
         inicializarComponentes();
     }
     
     /**
-     * Inicializa y configura todos los componentes de la interfaz.
+     * Inicializa y configura todos los componentes de la interfaz gráfica (GUI).
      */
     private void inicializarComponentes() {
         setTitle("Sistema de Gestión de Emergencias - Inicio");
@@ -72,7 +83,6 @@ public class VentanaInicio extends JFrame {
         setResizable(false);
         
 		contentPane = new JPanel();
-        // Aplicamos el color de fondo claro
         contentPane.setBackground(COLOR_FONDO_CLARO); 
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -80,7 +90,7 @@ public class VentanaInicio extends JFrame {
 		
 		JPanel panelVentanaInicio = new JPanel();
 		panelVentanaInicio.setBounds(0, 0, 534, 461);
-        panelVentanaInicio.setBackground(COLOR_FONDO_CLARO); // Fondo consistente
+        panelVentanaInicio.setBackground(COLOR_FONDO_CLARO); 
 		contentPane.add(panelVentanaInicio);
 		panelVentanaInicio.setLayout(null);
 		
@@ -91,26 +101,24 @@ public class VentanaInicio extends JFrame {
 		JLabel lblTituloVentanaInicio = new JLabel("GESTOR COMUNITARIO DE EMERGENCIAS Y PRIMEROS AUXILIOS");
 		
 		lblTituloVentanaInicio.setHorizontalAlignment(SwingConstants.CENTER);
-		lblTituloVentanaInicio.setFont(new Font("SansSerif", Font.BOLD, 17)); // Fuente más grande
-        lblTituloVentanaInicio.setForeground(COLOR_PRIMARIO); // Azul Profundo
+		lblTituloVentanaInicio.setFont(new Font("SansSerif", Font.BOLD, 17)); 
+        lblTituloVentanaInicio.setForeground(COLOR_PRIMARIO); 
 		lblTituloVentanaInicio.setBounds(10, 19, 500, 30);
 		panelVentanaInicio.add(lblTituloVentanaInicio);
 		
 		// LÓGICA DEL LOGO
 		JLabel lblLogoVentanaInicio = new JLabel(); 
         
-        final int LOGO_WIDTH = 150; // Logo un poco más grande
+        final int LOGO_WIDTH = 150; 
         final int LOGO_HEIGHT = 150;
 
-		lblLogoVentanaInicio.setBounds(192, 60, LOGO_WIDTH, LOGO_HEIGHT); // Centrado mejorado
+		lblLogoVentanaInicio.setBounds(192, 60, LOGO_WIDTH, LOGO_HEIGHT); 
 		
-        // ************************************************************
-        // CORRECCIÓN DE LA RUTA DEL LOGO A CLASSPATH ROOT
-        // ************************************************************
+        // RUTA DEL LOGO
         String logoPath = "/recursos/Logo.png";
         
         try {
-            // Usar getResource() es la forma más segura de obtener recursos en Java (JARs, IDEs)
+            // Manejo de Archivos: Uso de getResource para cargar recursos.
             URL logoURL = VentanaInicio.class.getResource(logoPath); 
             
             if (logoURL != null) {
@@ -119,16 +127,15 @@ public class VentanaInicio extends JFrame {
                 Image scaledImage = image.getScaledInstance(LOGO_WIDTH, LOGO_HEIGHT, Image.SCALE_SMOOTH);
                 lblLogoVentanaInicio.setIcon(new ImageIcon(scaledImage));
             } else {
-                // Si la URL es nula, lanzamos una excepción con un mensaje útil
+                // Manejo de Errores: Si la URL es nula
                 throw new Exception("URL del logo no encontrada. Ruta buscada en Classpath: " + logoPath);
             }
         } catch (Exception e) {
             System.err.println("Error al cargar el logo: " + e.getMessage());
-            // Fallback (si la imagen no se carga)
-            // LÍNEA 129 CORREGIDA: Texto de reemplazo válido entre comillas.
+            // Fallback
             lblLogoVentanaInicio.setText("[Logo No Encontrado]"); 
-            lblLogoVentanaInicio.setFont(new Font("SansSerif", Font.BOLD, 18));
-            lblLogoVentanaInicio.setForeground(COLOR_ACCENTO); // Color de acento
+            lblLogoVentanaInicio.setFont(new Font("SansSerif", Font.BOLD, 14)); // Ajuste de fuente para el fallback
+            lblLogoVentanaInicio.setForeground(COLOR_ACCENTO); 
             lblLogoVentanaInicio.setHorizontalAlignment(JLabel.CENTER);
         }
         
@@ -138,7 +145,6 @@ public class VentanaInicio extends JFrame {
         // --- 2. PANEL DE NOMBRES ---
         // -------------------------------------------------------------
 		JPanel panelNombresVentanaInicio = new JPanel();
-        // Aplicamos un borde más moderno y color de fuente primario
 		panelNombresVentanaInicio.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createLineBorder(Color.LIGHT_GRAY), 
             "Desarrollado por:", 
@@ -146,7 +152,7 @@ public class VentanaInicio extends JFrame {
             new Font("SansSerif", Font.BOLD, 12), 
             COLOR_PRIMARIO
         ));
-        panelNombresVentanaInicio.setBackground(COLOR_PANEL_BLANCO); // Fondo blanco
+        panelNombresVentanaInicio.setBackground(COLOR_PANEL_BLANCO); 
 		panelNombresVentanaInicio.setBounds(65, 230, 400, 150); 
 		panelNombresVentanaInicio.setLayout(null); 
 		panelVentanaInicio.add(panelNombresVentanaInicio);
@@ -176,8 +182,11 @@ public class VentanaInicio extends JFrame {
 
 		btnIniciarVenInicio.setBounds(50, 400, 210, 45); 
         
-        // Acción INICIAR: Llama al método para abrir el Login
         btnIniciarVenInicio.addActionListener(new ActionListener() {
+            /**
+             * Maneja el evento de clic del botón Iniciar.
+             * @param e El evento de acción.
+             */
             @Override
             public void actionPerformed(ActionEvent e) {
                 abrirAplicacionPrincipal();
@@ -195,10 +204,14 @@ public class VentanaInicio extends JFrame {
         
 		btnCerrarVenInicio.setBounds(275, 400, 210, 45); 
         
-        // Acción CERRAR: Cierra la aplicación
         btnCerrarVenInicio.addActionListener(new ActionListener() {
+            /**
+             * Maneja el evento de clic del botón Cerrar.
+             * @param e El evento de acción.
+             */
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Cierra la aplicación de forma segura
                 System.exit(0);
             }
         });
@@ -207,30 +220,30 @@ public class VentanaInicio extends JFrame {
     }
     
     // -------------------------------------------------------------------------
-    // MÉTODO QUE LANZA LoginView
+    // MÉTODO QUE LANZA LoginView (Demostración de Arquitectura)
     // -------------------------------------------------------------------------
 
     /**
-     * Método que inicializa el GestorUsuarios y lanza la vista de Login (LoginView).
+     * Inicializa la Capa Lógica (GestorUsuarios) y lanza la vista de Login (LoginView).
      */
     private void abrirAplicacionPrincipal() {
         try {
-            // 1. Inicializar el GestorUsuarios (debe manejar la carga de datos)
+            // 1. Inicializar la Capa Lógica (Arquitectura por Capas)
             GestorUsuarios gestor = new GestorUsuarios();
             
             // 2. Crear y mostrar la ventana de Login, pasándole el gestor
-            // IMPORTANTE: LoginView debe tener un constructor que acepte GestorUsuarios.
             LoginView loginFrame = new LoginView(gestor); 
             
-            // 3. Mostrar la nueva ventana y cerrar la ventana actual
+            // 3. Control de la Vista (End del Programa para esta vista)
             loginFrame.setLocationRelativeTo(null); 
             loginFrame.setVisible(true);
             dispose(); // Cierra la VentanaInicio
             
         } catch (Exception e) {
+            // Manejo de Errores: Error crítico al fallar la inicialización
             JOptionPane.showMessageDialog(this, 
-                "Error grave al iniciar la aplicación. Asegúrese que 'LoginView' tenga un constructor que acepte GestorUsuarios.", 
-                "Error de Ejecución", 
+                "Error grave al iniciar la aplicación. Revise la inicialización de GestorUsuarios y LoginView.", 
+                "Error de Ejecución Crítico", 
                 JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }

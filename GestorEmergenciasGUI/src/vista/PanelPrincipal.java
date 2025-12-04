@@ -1,10 +1,17 @@
+/**
+ * ***************************************************************
+ * GRUPO 10
+ * GESTOR COMUNITARIO DE EMERGENCIAS Y PRIMEROS AUXILIOS
+ * Jose Miguel Bueno Martinez - 20251020093
+ * Anyelo Esteban Casas Zapata - 20251020106
+ * ***************************************************************
+ */
 package vista;
 
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import java.awt.Dimension;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -37,6 +44,13 @@ import javax.swing.ImageIcon;
 import java.awt.Image; 
 import javax.swing.SwingConstants; 
 
+/**
+ * Clase principal del panel de control de la aplicación.
+ * Implementa un diseño con menú lateral (sidebar) y paneles de contenido 
+ * navegables mediante CardLayout.
+ * @author Jose Miguel Bueno Martinez
+ * @author Anyelo Esteban Casas Zapata
+ */
 public class PanelPrincipal extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -45,15 +59,15 @@ public class PanelPrincipal extends JFrame {
     // ====================================================
     // 🎨 DEFINICIÓN DE COLORES DEL LOGO 🎨
     // ====================================================
-    private final Color COLOR_PRIMARIO = new Color(26, 75, 140);   // #1A4B8C (Azul Profundo)
-    private final Color COLOR_ACCENTO = new Color(217, 0, 29);    // #D9001D (Rojo Brillante)
+    private final Color COLOR_PRIMARIO = new Color(26, 75, 140);   // Azul Profundo
+    private final Color COLOR_ACCENTO = new Color(217, 0, 29);    // Rojo Brillante
     private final Color COLOR_FONDO_MENU = new Color(50, 50, 50); // Gris Oscuro para el menú
     private final Color COLOR_FONDO_CLARO = new Color(245, 245, 245); // Gris Claro para el fondo principal
 	
     // Campo para almacenar el rol 
     private String rolActual; 
 
-	// Variables funcionales y de componentes
+	// Variables funcionales y de componentes de la GUI
 	private int mouseX, mouseY;
 	private CardLayout cardLayout;
 	private JTextField tfBuscarIncidentes;
@@ -78,11 +92,12 @@ public class PanelPrincipal extends JFrame {
     private JButton btnGuiasPAuxilios;
     private JButton btnReportes;
     
-    // 💡 NUEVA VARIABLE PARA RASTREAR EL BOTÓN ACTIVO
+    // Variable para rastrear el botón activo (para mantener el color)
     private JButton btnActivo; 
     
 	/**
-	 * Launch the application.
+	 * Método principal para la ejecución de prueba de la ventana.
+	 * @param args Argumentos de la línea de comandos.
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -90,6 +105,7 @@ public class PanelPrincipal extends JFrame {
 				try {
 					// Usamos el constructor con un rol de prueba
 					PanelPrincipal frame = new PanelPrincipal("Coordinador"); 
+                    frame.setLocationRelativeTo(null);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -98,27 +114,34 @@ public class PanelPrincipal extends JFrame {
 		});
 	}
     
-    // ====================================================
-    // 💡 CLASE INTERNA PARA EL ESTILO DE BOTÓN DEL MENÚ (MODIFICADA)
-    // ====================================================
+    /**
+     * Clase interna para definir el estilo y comportamiento de los botones del menú.
+     */
     private class MenuButton extends JButton {
+        
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Constructor de un botón de menú.
+         * @param text El texto a mostrar en el botón.
+         */
         public MenuButton(String text) {
             super(text);
             setFont(new Font("SansSerif", Font.BOLD, 14));
-            setBackground(COLOR_FONDO_MENU); // Fondo del menú por defecto
+            setBackground(COLOR_FONDO_MENU); 
             setForeground(Color.WHITE); 
             setFocusPainted(false);
             setBorderPainted(false);
             setHorizontalAlignment(SwingConstants.LEFT);
             setOpaque(true);
-            // Padding/Margen
             setBorder(new EmptyBorder(0, 20, 0, 0)); 
             
-            // Efecto hover (cambia el color de fondo al pasar el mouse)
+            // Efecto hover
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    setBackground(COLOR_PRIMARIO); // Siempre Azul Profundo al pasar el mouse
+                    // Siempre Azul Profundo al pasar el mouse
+                    setBackground(COLOR_PRIMARIO); 
                 }
 
                 @Override
@@ -134,9 +157,10 @@ public class PanelPrincipal extends JFrame {
     }
 
 
-	// ----------------------------------------------------
-	// 🔨 CONSTRUCTORES 🔨
-	// ----------------------------------------------------
+	/**
+	 * Constructor principal de la ventana con la definición del rol.
+	 * @param rol El rol del usuario logueado.
+	 */
 	public PanelPrincipal(String rol) {
         this.rolActual = rol;
 		inicializarComponentes();
@@ -145,43 +169,40 @@ public class PanelPrincipal extends JFrame {
         lblTitulo.setText("GESTOR COMUNITARIO - " + rol.toUpperCase());
 	}
     
+	/**
+	 * Constructor por defecto, llama al principal con rol "Desconocido".
+	 */
 	public PanelPrincipal() {
-        this("Desconocido"); // Llama al constructor principal con un rol predeterminado
+        this("Desconocido"); 
 	}
 
-	// ----------------------------------------------------
-	// 🛠️ INICIALIZACIÓN DE COMPONENTES 🛠️
-	// ----------------------------------------------------
-
-    /**
+	/**
      * Gestiona la selección visual de los botones del menú.
      * Desactiva el botón previamente activo y activa el nuevo.
      * @param nuevoBoton El JButton que se acaba de presionar.
      */
     private void activarBoton(JButton nuevoBoton) {
-        // Si hay un botón activo y no es el que acabamos de presionar, desactívalo
+        // Si hay un botón activo, lo desactiva visualmente
         if (btnActivo != null && btnActivo != nuevoBoton) {
             btnActivo.setBackground(COLOR_FONDO_MENU);
         }
         
-        // Asigna el nuevo botón activo y coloréalo
+        // Asigna el nuevo botón como activo y lo pinta de COLOR_PRIMARIO
         btnActivo = nuevoBoton;
         btnActivo.setBackground(COLOR_PRIMARIO);
     }
     
 	/**
-	 * Inicializa todos los componentes de la interfaz.
+	 * Inicializa y configura todos los componentes de la interfaz.
 	 */
 	private void inicializarComponentes() {
 
-		// 1. CONFIGURACIÓN DE LA VENTANA
-		setUndecorated(true);
+		// 1. CONFIGURACIÓN DE LA VENTANA PRINCIPAL
+		setUndecorated(true); // Ventana sin bordes nativos
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
-
-		this.setSize(1000, 700);
-		this.setLocationRelativeTo(null);
-		this.setResizable(false); 
+		setBounds(100, 100, 1000, 700);
+		setSize(1000, 700);
+		setResizable(false); 
 
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -192,7 +213,7 @@ public class PanelPrincipal extends JFrame {
 		panelFondo.setBounds(0, 0, 1000, 700);
 		contentPane.add(panelFondo);
 		panelFondo.setLayout(null);
-        panelFondo.setBackground(COLOR_FONDO_CLARO); // Fondo global de la aplicación
+        panelFondo.setBackground(COLOR_FONDO_CLARO); 
 
 		// --- 2. Barra de Título (Arrastrable y Controles) ---
 		JPanel panelBarra = new JPanel();
@@ -201,16 +222,14 @@ public class PanelPrincipal extends JFrame {
         panelBarra.setBackground(COLOR_FONDO_MENU); 
 		panelFondo.add(panelBarra);
 
-		// LÓGICA DEL LOGO
+		// LÓGICA DEL LOGO EN LA BARRA
 		JLabel lblLogo = new JLabel("");
 		final int LOGO_WIDTH = 37; 
 		final int LOGO_HEIGHT = 37;
-		
 		lblLogo.setBounds(6, 2, LOGO_WIDTH, LOGO_HEIGHT);
 		lblLogo.setFont(new Font("SansSerif", Font.BOLD, 14));
 		panelBarra.add(lblLogo);
 		
-		// Intento de cargar el logo desde recursos
 		String logoPath = "/recursos/Logo.png"; 
 		try {
 		    URL logoURL = PanelPrincipal.class.getResource(logoPath); 
@@ -230,7 +249,7 @@ public class PanelPrincipal extends JFrame {
 		    lblLogo.setText("I");
 		}
 		
-		// Lógica de Minimizar y Cerrar (Usando COLOR_FONDO_MENU)
+		// Botón Minimizar
 		JButton btnMinimizar = new JButton("-");
 		btnMinimizar.setBounds(885, 0, 50, 40); 
 		btnMinimizar.setFont(new Font("SansSerif", Font.BOLD, 20));
@@ -241,24 +260,39 @@ public class PanelPrincipal extends JFrame {
 		btnMinimizar.addActionListener(e -> setState(JFrame.ICONIFIED));
 		panelBarra.add(btnMinimizar);
 
+		// Botón Cerrar
 		JButton btnCerrar = new JButton("x");
 		btnCerrar.setBounds(937, 0, 53, 40); 
 		btnCerrar.setFont(new Font("SansSerif", Font.BOLD, 15));
         btnCerrar.setForeground(Color.WHITE);
-        btnCerrar.setBackground(COLOR_FONDO_MENU);
+        btnCerrar.setBackground(COLOR_ACCENTO); // Rojo para Cerrar
         btnCerrar.setBorderPainted(false);
         btnCerrar.setFocusPainted(false);
 		btnCerrar.addActionListener(e -> System.exit(0));
+		
+        // Hover effect para el botón cerrar
+        btnCerrar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnCerrar.setBackground(new Color(255, 50, 70));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                 btnCerrar.setBackground(COLOR_ACCENTO); 
+            }
+        });
+        
 		panelBarra.add(btnCerrar);
 		
-        // Inicialización del JLabel de título
+        // Título de la Aplicación
 		lblTitulo = new JLabel("GESTOR COMUNITARIO"); 
         lblTitulo.setForeground(Color.WHITE);
 		lblTitulo.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 18));
 		lblTitulo.setBounds(50, 9, 450, 23); 
 		panelBarra.add(lblTitulo);
 
-		// Lógica de Arrastre (Mover la ventana)
+		// Lógica de Arrastre (Mover la ventana sin barra de título)
 		panelBarra.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				mouseX = e.getX();
@@ -281,7 +315,7 @@ public class PanelPrincipal extends JFrame {
 
 		// --- 4. Panel de Contenido (Vistas) ---
 		JPanel panelContenido = new JPanel();
-		panelContenido.setBounds(200, 40, 800, 620); // Ajuste de 1px a 200/800
+		panelContenido.setBounds(200, 40, 800, 620);
         panelContenido.setBackground(COLOR_FONDO_CLARO);
 		panelFondo.add(panelContenido);
 
@@ -289,10 +323,10 @@ public class PanelPrincipal extends JFrame {
 		panelContenido.setLayout(cardLayout);
 
 		// ----------------------------------------------------
-		// 5. LISTENERS Y BOTONES DEL MENÚ (Usando MenuButton) - AHORA CON LÓGICA DE ACTIVACIÓN
+		// 5. BOTONES DEL MENÚ DE NAVEGACIÓN
 		// ----------------------------------------------------
         
-        // Botones de Navegación
+        // Botón Dashboard
 		btnDashboard = new MenuButton("  Tablero");
 		btnDashboard.setBounds(0, 21, 200, 45); 
 		btnDashboard.addActionListener(e -> {
@@ -300,11 +334,12 @@ public class PanelPrincipal extends JFrame {
             activarBoton(btnDashboard); 
         });
         
-        // Inicializamos el Dashboard como el botón activo por defecto
+        // Establecer Dashboard como activo por defecto
         btnActivo = btnDashboard; 
         btnActivo.setBackground(COLOR_PRIMARIO);
 		panelBotones.add(btnDashboard);
 
+		// Botón Incidentes Activos
 		btnIncidentesActivos = new MenuButton("  Incidentes Activos");
 		btnIncidentesActivos.setBounds(0, 75, 200, 45);
 		btnIncidentesActivos.addActionListener(e -> {
@@ -313,6 +348,7 @@ public class PanelPrincipal extends JFrame {
         });
 		panelBotones.add(btnIncidentesActivos);
 
+		// Botón Inventario Suministros
 		btnInventarioSuministros = new MenuButton("  Inventario Suministros");
 		btnInventarioSuministros.setBounds(0, 129, 200, 45);
 		btnInventarioSuministros.addActionListener(e -> {
@@ -321,6 +357,7 @@ public class PanelPrincipal extends JFrame {
         });
 		panelBotones.add(btnInventarioSuministros);
 
+		// Botón Brigadistas
 		btnBrigadistas = new MenuButton("  Brigadistas");
 		btnBrigadistas.setBounds(0, 183, 200, 45);
 		btnBrigadistas.addActionListener(e -> {
@@ -329,6 +366,7 @@ public class PanelPrincipal extends JFrame {
         });
 		panelBotones.add(btnBrigadistas);
 
+		// Botón Guías P. Auxilios
 		btnGuiasPAuxilios = new MenuButton("  Guías P. Auxilios");
 		btnGuiasPAuxilios.setBounds(0, 237, 200, 45);
 		btnGuiasPAuxilios.addActionListener(e -> {
@@ -337,6 +375,7 @@ public class PanelPrincipal extends JFrame {
         });
 		panelBotones.add(btnGuiasPAuxilios);
 
+		// Botón Reportes
 		btnReportes = new MenuButton("  Reportes");
 		btnReportes.setBounds(0, 291, 200, 45);
 		btnReportes.addActionListener(e -> {
@@ -345,34 +384,36 @@ public class PanelPrincipal extends JFrame {
         });
 		panelBotones.add(btnReportes);
         
-        // --- Separador de secciones en el menú
+        // Separador de secciones en el menú
         JPanel separadorMenu = new JPanel();
-        separadorMenu.setBackground(new Color(100, 100, 100)); // Gris más claro sobre el fondo oscuro
+        separadorMenu.setBackground(new Color(100, 100, 100)); 
         separadorMenu.setBounds(10, 350, 180, 1);
         panelBotones.add(separadorMenu);
         
+        // Botón Cerrar Sesión
         JButton btnCerrarSesion = new JButton("CERRAR SESIÓN");
         btnCerrarSesion.setFont(new Font("SansSerif", Font.BOLD, 14));
         btnCerrarSesion.setBounds(10, 560, 180, 45);
-        btnCerrarSesion.setBackground(COLOR_ACCENTO); // ROJO de Énfasis/Emergencia
+        btnCerrarSesion.setBackground(COLOR_ACCENTO); 
         btnCerrarSesion.setForeground(Color.WHITE);
         btnCerrarSesion.setBorderPainted(false);
         btnCerrarSesion.setFocusPainted(false);
         btnCerrarSesion.addActionListener(e -> {
             // Lógica para cerrar sesión (ej. volver a la pantalla de login)
             dispose(); 
+            // Implementar la lógica para abrir LoginView aquí si fuera necesario
         });
         
-        // AÑADIR HOVER SÓLO A ESTE BOTÓN (NO DE NAVEGACIÓN PRINCIPAL)
+        // Hover SÓLO para Cerrar Sesión
         btnCerrarSesion.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                btnCerrarSesion.setBackground(new Color(255, 50, 70)); // Rojo más claro al pasar
+                btnCerrarSesion.setBackground(new Color(255, 50, 70)); 
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                 btnCerrarSesion.setBackground(COLOR_ACCENTO); // Vuelve al rojo original al salir
+                 btnCerrarSesion.setBackground(COLOR_ACCENTO); 
             }
         });
         
@@ -406,7 +447,7 @@ public class PanelPrincipal extends JFrame {
 
 		JLabel lblNumIncidentes = new JLabel("12");
 		lblNumIncidentes.setFont(new Font("SansSerif", Font.BOLD, 30));
-        lblNumIncidentes.setForeground(COLOR_PRIMARIO); // Color primario para métricas
+        lblNumIncidentes.setForeground(COLOR_PRIMARIO); 
 		lblNumIncidentes.setBounds(20, 21, 100, 36);
 		panelIncidentesAbiertos.add(lblNumIncidentes);
 
@@ -435,14 +476,14 @@ public class PanelPrincipal extends JFrame {
 
 		JPanel panelStockCritico = new JPanel();
 		panelStockCritico.setLayout(null);
-		panelStockCritico.setBorder(new LineBorder(COLOR_ACCENTO, 1)); // Borde rojo
+		panelStockCritico.setBorder(new LineBorder(COLOR_ACCENTO, 1)); 
         panelStockCritico.setBackground(Color.WHITE);
 		panelStockCritico.setBounds(540, 70, 250, 100);
 		panelDashboard.add(panelStockCritico);
 
 		JLabel lblNumStock = new JLabel("5");
 		lblNumStock.setFont(new Font("SansSerif", Font.BOLD, 30));
-        lblNumStock.setForeground(COLOR_ACCENTO); // Número en rojo
+        lblNumStock.setForeground(COLOR_ACCENTO); 
 		lblNumStock.setBounds(20, 21, 100, 40);
 		panelStockCritico.add(lblNumStock);
 
@@ -451,7 +492,7 @@ public class PanelPrincipal extends JFrame {
 		lblStockCritico.setBounds(20, 61, 200, 16);
 		panelStockCritico.add(lblStockCritico);
 
-        // Dashboard: Gráficos (Fondo blanco)
+        // Dashboard: Gráficos (Simulados)
 		JPanel panelIncidentesPrioridad = new JPanel();
 		panelIncidentesPrioridad.setFont(new Font("SansSerif", Font.BOLD, 12));
 		panelIncidentesPrioridad.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)),
@@ -473,7 +514,7 @@ public class PanelPrincipal extends JFrame {
 		panelContenido.add(panelIncidentes, "Incidentes");
 		panelIncidentes.setLayout(null);
         
-        // Títulos y botones con COLOR_PRIMARIO
+        // Títulos y filtros
         JLabel lblTituloIncidentesActCurso = new JLabel("Incidentes Activos en Curso");
 		lblTituloIncidentesActCurso.setFont(new Font("SansSerif", Font.BOLD, 18));
 		lblTituloIncidentesActCurso.setBounds(20, 11, 301, 25);
@@ -491,9 +532,9 @@ public class PanelPrincipal extends JFrame {
 		panelIncidentes.add(tfBuscarIncidentes);
 		tfBuscarIncidentes.setColumns(10);
 
-		JComboBox cbFiltroPrioridad = new JComboBox();
+		JComboBox<String> cbFiltroPrioridad = new JComboBox<>();
 		cbFiltroPrioridad.setModel(
-				new DefaultComboBoxModel(new String[] { "Prioridad Alta", "Prioridad Media", "Prioridad Baja" }));
+				new DefaultComboBoxModel<>(new String[] { "Prioridad Alta", "Prioridad Media", "Prioridad Baja" }));
 		cbFiltroPrioridad.setFont(new Font("SansSerif", Font.PLAIN, 12));
 		cbFiltroPrioridad.setBounds(291, 50, 120, 25);
 		panelIncidentes.add(cbFiltroPrioridad);
@@ -513,11 +554,11 @@ public class PanelPrincipal extends JFrame {
 
 		tableIncidentes = new JTable();
 		tableIncidentes.setModel(new DefaultTableModel(new Object[][] {},
-				new String[] { "ID", "Tipo", "Prioridad", "Ubicaci\u00F3n", "Tiempo Activo", "Brigadista Asignado" }));
+				new String[] { "ID", "Tipo", "Prioridad", "Ubicación", "Tiempo Activo", "Brigadista Asignado" }));
 		tableIncidentes.getColumnModel().getColumn(4).setPreferredWidth(87);
 		tableIncidentes.getColumnModel().getColumn(5).setPreferredWidth(117);
 		tableIncidentes.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        tableIncidentes.getTableHeader().setBackground(new Color(230, 230, 230)); // Cabecera gris claro
+        tableIncidentes.getTableHeader().setBackground(new Color(230, 230, 230)); 
 		spIncidentes.setViewportView(tableIncidentes);
         
         // Botones de acción
@@ -557,9 +598,9 @@ public class PanelPrincipal extends JFrame {
 		panelInventario.add(tfBuscarNombreSuminis);
 		tfBuscarNombreSuminis.setColumns(10);
 
-		JComboBox cbFiltroUbi = new JComboBox();
+		JComboBox<String> cbFiltroUbi = new JComboBox<>();
 		cbFiltroUbi.setModel(
-				new DefaultComboBoxModel(new String[] { "Almacén Principal", "Almacén A", "Almacén B", "Almacén C" }));
+				new DefaultComboBoxModel<>(new String[] { "Almacén Principal", "Almacén A", "Almacén B", "Almacén C" }));
 		cbFiltroUbi.setFont(new Font("SansSerif", Font.PLAIN, 12));
 		cbFiltroUbi.setBounds(355, 53, 127, 25);
 		panelInventario.add(cbFiltroUbi);
@@ -586,7 +627,7 @@ public class PanelPrincipal extends JFrame {
 		tableSuministros = new JTable();
 		tableSuministros
 				.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "ID", "Suministro", "Stock Actual",
-						"Unidad (Kg/Uni)", "M\u00EDnimo Cr\u00EDtico", "Ubicaci\u00F3n", "Fecha de Caducidad" }));
+						"Unidad (Kg/Uni)", "Mínimo Crítico", "Ubicación", "Fecha de Caducidad" }));
 		tableSuministros.getColumnModel().getColumn(3).setPreferredWidth(90);
 		tableSuministros.getColumnModel().getColumn(6).setPreferredWidth(116);
 		tableSuministros.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -630,9 +671,9 @@ public class PanelPrincipal extends JFrame {
 		tfBuscarBrigadistas.setBounds(95, 51, 250, 25);
 		panelBrigadistas.add(tfBuscarBrigadistas);
 
-		JComboBox cbFiltroEstadoBrig = new JComboBox();
+		JComboBox<String> cbFiltroEstadoBrig = new JComboBox<>();
 		cbFiltroEstadoBrig.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		cbFiltroEstadoBrig.setModel(new DefaultComboBoxModel(new String[] { "Libre", "En Servicio", "Descanso" }));
+		cbFiltroEstadoBrig.setModel(new DefaultComboBoxModel<>(new String[] { "Libre", "En Servicio", "Descanso" }));
 		cbFiltroEstadoBrig.setToolTipText("");
 		cbFiltroEstadoBrig.setBounds(355, 51, 120, 25);
 		panelBrigadistas.add(cbFiltroEstadoBrig);
@@ -651,14 +692,14 @@ public class PanelPrincipal extends JFrame {
 
 		tableBrigadistas = new JTable();
 		tableBrigadistas.setModel(new DefaultTableModel(new Object[][] {},
-				new String[] { "ID", "Nombre", "Estado", "Especialidad", "Tel\u00E9fono" }));
+				new String[] { "ID", "Nombre", "Estado", "Especialidad", "Teléfono" }));
 		tableBrigadistas.setFont(new Font("SansSerif", Font.PLAIN, 12));
         tableBrigadistas.getTableHeader().setBackground(new Color(230, 230, 230));
 		spBrigadistas.setViewportView(tableBrigadistas);
 
 		JPanel panelDetallesBrigadista = new JPanel(); 
         panelDetallesBrigadista.setBackground(Color.WHITE);
-		panelDetallesBrigadista.setBounds(490, 90, 301, 500); // Ancho ajustado a 301
+		panelDetallesBrigadista.setBounds(490, 90, 301, 500); 
 		panelBrigadistas.add(panelDetallesBrigadista);
 		panelDetallesBrigadista.setLayout(null);
 		panelDetallesBrigadista.setBorder(new TitledBorder(new LineBorder(COLOR_PRIMARIO, 1), "Detalles del Brigadista", TitledBorder.LEFT, TitledBorder.TOP, new Font("SansSerif", Font.BOLD, 12), COLOR_PRIMARIO)); 
@@ -678,9 +719,9 @@ public class PanelPrincipal extends JFrame {
 		lblEstadoActualBrig.setBounds(10, 101, 155, 27);
 		panelDetallesBrigadista.add(lblEstadoActualBrig);
 
-		JComboBox cbEditarEstadoBrig = new JComboBox();
+		JComboBox<String> cbEditarEstadoBrig = new JComboBox<>();
 		cbEditarEstadoBrig.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		cbEditarEstadoBrig.setModel(new DefaultComboBoxModel(new String[] { "Libre", "En Servicio", "Descanso" }));
+		cbEditarEstadoBrig.setModel(new DefaultComboBoxModel<>(new String[] { "Libre", "En Servicio", "Descanso" }));
 		cbEditarEstadoBrig.setBounds(10, 130, 150, 27);
 		panelDetallesBrigadista.add(cbEditarEstadoBrig);
 
@@ -719,8 +760,8 @@ public class PanelPrincipal extends JFrame {
 		tfProtocolosPrimAux.setBounds(120, 51, 300, 25);
 		panelGuiasPAuxilios.add(tfProtocolosPrimAux);
 
-		JComboBox cbFiltroCategPrimAux = new JComboBox();
-		cbFiltroCategPrimAux.setModel(new DefaultComboBoxModel(new String[] { "Trauma", "RCP", "Quemaduras" }));
+		JComboBox<String> cbFiltroCategPrimAux = new JComboBox<>();
+		cbFiltroCategPrimAux.setModel(new DefaultComboBoxModel<>(new String[] { "Trauma", "RCP", "Quemaduras" }));
 		cbFiltroCategPrimAux.setToolTipText("");
 		cbFiltroCategPrimAux.setFont(new Font("SansSerif", Font.PLAIN, 12));
 		cbFiltroCategPrimAux.setBounds(450, 51, 120, 25);
@@ -731,17 +772,18 @@ public class PanelPrincipal extends JFrame {
 		spPrimerosAux.setBounds(20, 91, 250, 500);
 		panelGuiasPAuxilios.add(spPrimerosAux);
 
-		JList listProtocolosPrimAux = new JList();
+		JList<String> listProtocolosPrimAux = new JList<>();
 		listProtocolosPrimAux.setFont(new Font("SansSerif", Font.PLAIN, 12));
         listProtocolosPrimAux.setBorder(new EmptyBorder(5, 5, 5, 5));
-		listProtocolosPrimAux.setModel(new AbstractListModel() {
+		listProtocolosPrimAux.setModel(new AbstractListModel<String>() {
+            private static final long serialVersionUID = 1L;
 			String[] values = new String[] { "Protocolo de Quemaduras", "Manejo de Fracturas" };
 
 			public int getSize() {
 				return values.length;
 			}
 
-			public Object getElementAt(int index) {
+			public String getElementAt(int index) {
 				return values[index];
 			}
 		});
@@ -752,7 +794,8 @@ public class PanelPrincipal extends JFrame {
 		panelVisualGuiaPrimAux.setBounds(280, 91, 511, 500);
 		panelGuiasPAuxilios.add(panelVisualGuiaPrimAux);
 		panelVisualGuiaPrimAux.setLayout(null);
-
+        
+        // Contenido del Panel Visual de Guías (Tu código proporcionado a continuación)
 		JLabel lblTituloGuiaPrimAux = new JLabel("Título del Documento");
 		lblTituloGuiaPrimAux.setFont(new Font("SansSerif", Font.BOLD, 15));
         lblTituloGuiaPrimAux.setForeground(COLOR_PRIMARIO);
@@ -765,9 +808,10 @@ public class PanelPrincipal extends JFrame {
 		panelVisualGuiaPrimAux.add(spVisualGuiasPrimAux);
 
 		JEditorPane epVisualGuiasPrimAux = new JEditorPane();
+        epVisualGuiasPrimAux.setEditable(false); // La guía no debe ser editable
 		spVisualGuiasPrimAux.setViewportView(epVisualGuiasPrimAux);
 
-		// --- Panel Reportes --- 
+		// --- Panel Reportes ---	
 		JPanel panelReportes = new JPanel();
         panelReportes.setBackground(COLOR_FONDO_CLARO);
 		panelContenido.add(panelReportes, "Reportes");
@@ -793,9 +837,9 @@ public class PanelPrincipal extends JFrame {
 		lblTipoReporte.setBounds(20, 30, 150, 25);
 		panelPeriodoTipoReportes.add(lblTipoReporte);
         
-        JComboBox cbTipoReporte = new JComboBox();
+        JComboBox<String> cbTipoReporte = new JComboBox<>();
 		cbTipoReporte.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		cbTipoReporte.setModel(new DefaultComboBoxModel(new String[] { "Incidente", "Inventario", "Brigadistas" }));
+		cbTipoReporte.setModel(new DefaultComboBoxModel<>(new String[] { "Incidente", "Inventario", "Brigadistas" }));
 		cbTipoReporte.setBounds(130, 30, 200, 25);
 		panelPeriodoTipoReportes.add(cbTipoReporte);
         
@@ -804,6 +848,7 @@ public class PanelPrincipal extends JFrame {
 		lblFechaInicioReporte.setBounds(20, 70, 150, 25);
 		panelPeriodoTipoReportes.add(lblFechaInicioReporte);
         
+        // Uso de MaskFormatter para Fecha Inicio
         try {
 			MaskFormatter mfFecha = new MaskFormatter("##/##/####");
 			tfFechaInicioReporte = new JFormattedTextField(mfFecha);
@@ -822,6 +867,7 @@ public class PanelPrincipal extends JFrame {
 		lblFechaFinReporte.setBounds(20, 110, 150, 25);
 		panelPeriodoTipoReportes.add(lblFechaFinReporte);
 
+        // Uso de MaskFormatter para Fecha Fin
         try {
 			MaskFormatter mfFecha = new MaskFormatter("##/##/####");
 			tfFechaFinReporte = new JFormattedTextField(mfFecha);
@@ -874,7 +920,7 @@ public class PanelPrincipal extends JFrame {
 		panelFooter.setBounds(0, 660, 1000, 40);
 		panelFondo.add(panelFooter);
 		panelFooter.setLayout(null);
-        panelFooter.setBackground(new Color(230, 230, 230)); // Gris claro para el footer
+        panelFooter.setBackground(new Color(230, 230, 230)); 
 
 		lblEstadoFooter = new JLabel("Estado: Conectado como " + rolActual);
 		lblEstadoFooter.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -893,9 +939,13 @@ public class PanelPrincipal extends JFrame {
 		lblFechaHora.setHorizontalAlignment(SwingConstants.RIGHT);
 		panelFooter.add(lblFechaHora);
 
-		// Timer para actualizar la hora
+		// Timer para actualizar la hora (cada 1000ms = 1 segundo)
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		Timer timer = new Timer(1000, new ActionListener() {
+            /**
+             * Acción que se ejecuta cada segundo para actualizar el reloj.
+             * @param e El evento de acción.
+             */
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				lblFechaHora.setText(dateFormat.format(new Date()));
