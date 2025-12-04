@@ -8,10 +8,12 @@ public class Usuario implements Serializable {
     
     private String nombreCompleto;
     private String nombreUsuario; 
-    private String contrasena; 
+    private String contrasena; // NOTA: En una aplicación real, esta debería ser hasheada y no almacenada en texto plano.
     private String rol; 
 
-    // Constructor
+    /**
+     * Constructor completo para crear un nuevo usuario.
+     */
     public Usuario(String nombreCompleto, String nombreUsuario, String contrasena, String rol) {
         this.nombreCompleto = nombreCompleto;
         this.nombreUsuario = nombreUsuario;
@@ -19,12 +21,20 @@ public class Usuario implements Serializable {
         this.rol = rol;
     }
 
-    // Getters necesarios para la autenticación y el Panel Principal
+    // -----------------------------------------------------------------
+    // GETTERS (Lectura de propiedades)
+    // -----------------------------------------------------------------
+
+    public String getNombreCompleto() {
+        return nombreCompleto;
+    }
+
     public String getNombreUsuario() {
         return nombreUsuario;
     }
 
     public String getContrasena() {
+        // Se mantiene para el método validarCredenciales en GestorUsuarios.
         return contrasena;
     }
     
@@ -32,5 +42,33 @@ public class Usuario implements Serializable {
         return rol;
     }
 
-    // Puedes añadir más getters si los necesitas...
+    // -----------------------------------------------------------------
+    // SETTERS (Modificación de propiedades)
+    // -----------------------------------------------------------------
+
+    public void setNombreCompleto(String nombreCompleto) {
+        this.nombreCompleto = nombreCompleto;
+    }
+
+    public void setNombreUsuario(String nombreUsuario) {
+        this.nombreUsuario = nombreUsuario;
+    }
+
+    public void setContrasena(String contrasena) {
+        // Se permite el cambio de contraseña.
+        this.contrasena = contrasena;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+    
+    // -----------------------------------------------------------------
+    // MÉTODO TOSTRING (Útil para depuración)
+    // -----------------------------------------------------------------
+    
+    @Override
+    public String toString() {
+        return "Usuario [nombreCompleto=" + nombreCompleto + ", nombreUsuario=" + nombreUsuario + ", rol=" + rol + "]";
+    }
 }
