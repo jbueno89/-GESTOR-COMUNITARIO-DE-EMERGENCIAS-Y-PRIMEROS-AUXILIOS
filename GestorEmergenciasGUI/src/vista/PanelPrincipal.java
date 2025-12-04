@@ -25,16 +25,18 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JList;
 import javax.swing.AbstractListModel;
 import javax.swing.JEditorPane;
-// LIBRERÍAS AÑADIDAS PARA LAS FUNCIONALIDADES:
 import java.text.SimpleDateFormat;
 import javax.swing.Timer;
 import java.util.Date;
 import javax.swing.text.MaskFormatter;
 import javax.swing.JFormattedTextField;
 import javax.swing.border.LineBorder;
-import java.net.URL; // Necesario para cargar recursos
-import javax.swing.ImageIcon; // Necesario para el logo
-import java.awt.Image; // Necesario para escalar el logo
+import javax.swing.SwingConstants; 
+// ************************************************************
+// NUEVAS IMPORTACIONES PARA IMAGEN
+// ************************************************************
+import javax.swing.ImageIcon; // Para cargar la imagen
+import java.awt.Image; // Para escalar la imagen
 
 public class PanelPrincipal extends JFrame {
 
@@ -44,6 +46,20 @@ public class PanelPrincipal extends JFrame {
 	// Variables funcionales
 	private int mouseX, mouseY;
 	private CardLayout cardLayout;
+	
+	// Variables para la lógica de roles (se mantiene para usar el rol en el contenido)
+	private String rolUsuario; 
+	
+	// Variables del menú lateral (deben ser atributos de clase para el estilo)
+	private JButton btnDashboard;
+	private JButton btnIncidentesActivos;
+	private JButton btnInventarioSuministros;
+	private JButton btnBrigadistas;
+	private JButton btnGuiasPAuxilios;
+	private JButton btnReportes;
+	private JButton btnCerrarSesion;
+	
+	// Variables de la vista
 	private JTextField tfBuscarIncidentes;
 	private JTable tableIncidentes;
 	private JTextField tfBuscarNombreSuminis;
@@ -51,17 +67,17 @@ public class PanelPrincipal extends JFrame {
 	private JTextField tfBuscarBrigadistas;
 	private JTable tableBrigadistas;
 	private JTextField tfProtocolosPrimAux;
-
-	// Cambiamos JTextField por JFormattedTextField para las fechas (Ver
-	// Constructor)
 	private JFormattedTextField tfFechaInicioReporte;
 	private JFormattedTextField tfFechaFinReporte;
-
 	private JTable tableReportesResultPrevi;
-
-	// Declaramos los JLabels del Footer para poder actualizarlos
 	private JLabel lblEstadoFooter;
 	private JLabel lblVersionFooter;
+
+	// Definición de colores
+	private final Color COLOR_PRIMARIO_AZUL = new Color(0, 153, 204); 
+	private final Color COLOR_FONDO_OSCURO = new Color(40, 40, 40); 
+	private final Color COLOR_BOTON_MENU = new Color(75, 75, 75); 
+	private final Color COLOR_CERRAR_SESION = new Color(220, 20, 60); 
 
 	/**
 	 * Launch the application.
@@ -70,7 +86,8 @@ public class PanelPrincipal extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					PanelPrincipal frame = new PanelPrincipal();
+					// Usamos el rol "Coordinador" para pruebas, aunque el menú es completo
+					PanelPrincipal frame = new PanelPrincipal(); 
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -78,12 +95,28 @@ public class PanelPrincipal extends JFrame {
 			}
 		});
 	}
+	
+	// ************************************************************
+	// Constructor Principal (Usado por Login/Registro)
+	// ************************************************************
+	public PanelPrincipal(String rol) {
+	    this.rolUsuario = rol;
+	    inicializarComponentes();
+	    // NOTA CLAVE: SE ELIMINA LA LLAMADA A filtrarBotonesPorRol()
+	    aplicarEstiloBotones(); 
+	}
+
 
 	/**
-	 * Create the frame.
+	 * Create the frame. (Constructor sin argumentos, llama al principal)
 	 */
 	public PanelPrincipal() {
-
+	    // Asigna el rol por defecto (ej. Coordinador)
+	    this("Coordinador"); 
+	}
+	
+	private void inicializarComponentes() {
+		
 		// 1. CONFIGURACIÓN DE LA VENTANA
 		setUndecorated(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -91,7 +124,7 @@ public class PanelPrincipal extends JFrame {
 
 		this.setSize(1000, 700);
 		this.setLocationRelativeTo(null);
-		this.setResizable(false); // <--- [FUNCIONALIDAD AÑADIDA] Bloquea la redimensión
+		this.setResizable(false); 
 
 		contentPane = new JPanel();
 		contentPane.setPreferredSize(new Dimension(1000, 700));
@@ -104,51 +137,74 @@ public class PanelPrincipal extends JFrame {
 		panelFondo.setBounds(0, 0, 1000, 700);
 		contentPane.add(panelFondo);
 		panelFondo.setLayout(null);
+        
+        // ************************************************************
+        // AÑADIR LOGO COMO FONDO DE PANTALLA
+        // ************************************************************
+        JLabel lblLogoFondo = new JLabel();
+        lblLogoFondo.setBounds(200, 40, 800, 620); // Área del panel de contenido (sin menú lateral ni barra superior)
+        lblLogoFondo.setOpaque(true);
+        lblLogoFondo.setBackground(Color.WHITE); // Fondo blanco para el área de contenido
+        panelFondo.add(lblLogoFondo); 
+        panelFondo.setComponentZOrder(lblLogoFondo, 0); // Asegura que el logo esté detrás de todo
 
+        try {
+            // Carga la imagen (asegúrate de que la ruta sea correcta)
+            ImageIcon originalIcon = new ImageIcon(getClass().getResource("/resources/Logo.png")); // Usa la ruta si está en un paquete 'resources'
+            // Si el archivo está en el directorio del proyecto y no en un JAR/paquete, usa:
+            // ImageIcon originalIcon = new ImageIcon("Logo.png");
+            
+            // Escala la imagen para que se ajuste al área de fondo (ej. 750x600) o déjalo a un tamaño fijo grande
+            Image originalImage = originalIcon.getImage();
+            // Tamaño objetivo: un poco más pequeño que el panel de contenido para que se vea bien centrado
+            int targetWidth = 600; 
+            int targetHeight = 600;
+            
+            Image scaledImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+            ImageIcon scaledIcon = new ImageIcon(scaledImage);
+            
+            lblLogoFondo.setIcon(scaledIcon);
+            lblLogoFondo.setHorizontalAlignment(SwingConstants.CENTER);
+            lblLogoFondo.setVerticalAlignment(SwingConstants.CENTER);
+            
+            // NOTA SOBRE TRANSPARENCIA: La parte blanca del logo (Logo.png)
+            // debe ser transparente *en el archivo PNG* para que el fondo
+            // blanco (o cualquier otro color) del JLabel se vea. 
+            // Si el logo ya es un PNG con fondo transparente, este código funcionará.
+
+        } catch (Exception e) {
+            System.err.println("Error al cargar o escalar el logo: " + e.getMessage());
+            // Si no carga, el fondo será simplemente blanco (por el lblLogoFondo.setBackground(Color.WHITE);)
+        }
+        
+        // La instrucción `panelFondo.setComponentZOrder(lblLogoFondo, 0);` 
+        // coloca el JLabel de fondo al inicio de la lista de componentes (detrás de todos).
+        // ************************************************************
+		// FIN AÑADIR LOGO COMO FONDO DE PANTALLA
+        // ************************************************************
+
+
+		// BARRA SUPERIOR (AZUL)
 		JPanel panelBarra = new JPanel();
 		panelBarra.setBounds(0, 0, 1000, 40);
+		panelBarra.setBackground(COLOR_PRIMARIO_AZUL);
 		panelFondo.add(panelBarra);
-		panelBarra.setLayout(null);
+		panelFondo.setComponentZOrder(panelBarra, 0); // Lo ponemos al frente (z-order 0 = más al frente en Swing)
 
-		// -------------------------------------------------------------------------
-		// LÓGICA DEL LOGO: Carga Logo.png y escalado dinámico al tamaño de lblLogo
-        // -------------------------------------------------------------------------
-		JLabel lblLogo = new JLabel("");
-		final int LOGO_X = 6;
-		final int LOGO_Y = 2;
-		final int LOGO_WIDTH = 50;
-		final int LOGO_HEIGHT = 37;
-		
-		lblLogo.setBounds(6, 2, 50, 37);
-		lblLogo.setFont(new Font("SansSerif", Font.BOLD, 14));
-		panelBarra.add(lblLogo);
-		
-		String logoPath = "recursos/Logo.png";
-		try {
-		    URL logoURL = VentanaInicio.class.getResource(logoPath);
-		    if (logoURL != null) {
-		        ImageIcon originalIcon = new ImageIcon(logoURL);
-		        Image image = originalIcon.getImage();
-		        // Escalamos la imagen al tamaño actual del JLabel
-		        Image scaledImage = image.getScaledInstance(LOGO_WIDTH, LOGO_HEIGHT, Image.SCALE_SMOOTH);
-		        lblLogo.setIcon(new ImageIcon(scaledImage));
-		    } else {
-		        // Fallback si la imagen no se carga
-		        lblLogo.setText("I"); 
-		        lblLogo.setFont(new Font("SansSerif", Font.BOLD, 20));
-		    }
-		} catch (Exception e) {
-		    System.err.println("Error al cargar el logo en PanelPrincipal: vista/" + logoPath);
-		    lblLogo.setText("I");
-		}
-		// -------------------------------------------------------------------------
-		// FIN LÓGICA DEL LOGO
-        // -------------------------------------------------------------------------
+		JLabel lblTituloLogo = new JLabel("GESTOR COMUNITARIO DE EMERGENCIAS");
+		lblTituloLogo.setBounds(10, 9, 350, 23);
+		lblTituloLogo.setFont(new Font("SansSerif", Font.BOLD, 14));
+		lblTituloLogo.setForeground(Color.WHITE); 
+		panelBarra.add(lblTituloLogo);
 
 		// Lógica de Minimizar
 		JButton btnMinimizar = new JButton("-");
 		btnMinimizar.setBounds(885, 2, 50, 37);
 		btnMinimizar.setFont(new Font("SansSerif", Font.BOLD, 20));
+		btnMinimizar.setBackground(COLOR_PRIMARIO_AZUL);
+		btnMinimizar.setForeground(Color.WHITE);
+		btnMinimizar.setBorderPainted(false);
+		btnMinimizar.setFocusPainted(false);
 		btnMinimizar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setState(JFrame.ICONIFIED);
@@ -160,17 +216,30 @@ public class PanelPrincipal extends JFrame {
 		JButton btnCerrar = new JButton("x");
 		btnCerrar.setBounds(937, 2, 53, 37);
 		btnCerrar.setFont(new Font("SansSerif", Font.BOLD, 15));
+		btnCerrar.setBackground(COLOR_PRIMARIO_AZUL);
+		btnCerrar.setForeground(Color.WHITE);
+		btnCerrar.setBorderPainted(false);
+		btnCerrar.setFocusPainted(false);
+		btnCerrar.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseEntered(MouseEvent e) {
+		        btnCerrar.setBackground(COLOR_CERRAR_SESION);
+		    }
+		    @Override
+		    public void mouseExited(MouseEvent e) {
+		        btnCerrar.setBackground(COLOR_PRIMARIO_AZUL);
+		    }
+		});
 		btnCerrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
 			}
 		});
+
+		JLabel label_1 = new JLabel("");
+		label_1.setBounds(360, 0, 106, 13);
+		panelBarra.add(label_1);
 		panelBarra.add(btnCerrar);
-		
-		JLabel lblTitulo = new JLabel("Selfsecurity\r\n");
-		lblTitulo.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 20));
-		lblTitulo.setBounds(49, 9, 128, 23);
-		panelBarra.add(lblTitulo);
 
 		// Lógica de Arrastre (Mover la ventana)
 		panelBarra.addMouseListener(new MouseAdapter() {
@@ -185,31 +254,86 @@ public class PanelPrincipal extends JFrame {
 			}
 		});
 
+		// PANEL DE BOTONES LATERAL (GRIS OSCURO)
 		JPanel panelBotones = new JPanel();
 		panelBotones.setFont(new Font("SansSerif", Font.BOLD, 12));
 		panelBotones.setBounds(0, 40, 200, 620);
+        panelBotones.setBackground(COLOR_FONDO_OSCURO); 
 		panelFondo.add(panelBotones);
+		panelFondo.setComponentZOrder(panelBotones, 0); // Lo ponemos al frente
+
 		panelBotones.setLayout(null);
 
-		// ----------------------------------------------------
 		// 2. CONEXIÓN DE CARDLAYOUT
-		// ----------------------------------------------------
 		JPanel panelContenido = new JPanel();
 		panelContenido.setBounds(199, 39, 801, 620);
+		// ************************************************************
+		// IMPORTANTE: Hacemos el panel de contenido transparente para ver el fondo
+		// ************************************************************
+		panelContenido.setOpaque(false);
 		panelFondo.add(panelContenido);
+		panelFondo.setComponentZOrder(panelContenido, 0); // Lo ponemos al frente
 
 		cardLayout = new CardLayout(0, 0);
 		panelContenido.setLayout(cardLayout);
 
-		// ************************************************************
-		// NOTA: Los nombres clave (String) de las tarjetas son:
-		// "Dashboard", "Incidentes", "Inventario", "Brigadistas", "GuiasPAuxilios",
-		// "Reportes"
-		// ************************************************************
+		// 3. CREACIÓN DE BOTONES DEL MENÚ LATERAL (SE CREAN TODOS VISIBLES)
+		
+		btnDashboard = new JButton("Tablero");
+		btnDashboard.setBounds(10, 21, 180, 40);
+		btnDashboard.addActionListener(e -> cardLayout.show(panelContenido, "Dashboard"));
+		panelBotones.add(btnDashboard);
 
+		btnIncidentesActivos = new JButton("Incidentes Activos");
+		btnIncidentesActivos.setBounds(10, 72, 180, 40);
+		btnIncidentesActivos.addActionListener(e -> cardLayout.show(panelContenido, "Incidentes"));
+		panelBotones.add(btnIncidentesActivos);
+
+		btnInventarioSuministros = new JButton("Inventario Suministros");
+		btnInventarioSuministros.setBounds(10, 123, 180, 40);
+		btnInventarioSuministros.addActionListener(e -> cardLayout.show(panelContenido, "Inventario"));
+		panelBotones.add(btnInventarioSuministros);
+
+		btnBrigadistas = new JButton("Brigadistas");
+		btnBrigadistas.setBounds(10, 174, 180, 40);
+		btnBrigadistas.addActionListener(e -> cardLayout.show(panelContenido, "Brigadistas"));
+		panelBotones.add(btnBrigadistas);
+
+		btnGuiasPAuxilios = new JButton("Guias Primeros Auxilios");
+		btnGuiasPAuxilios.setBounds(10, 225, 180, 40);
+		btnGuiasPAuxilios.addActionListener(e -> cardLayout.show(panelContenido, "GuiasPAuxilios"));
+		panelBotones.add(btnGuiasPAuxilios);
+
+		btnReportes = new JButton("Reportes");
+		btnReportes.setBounds(10, 276, 180, 40);
+		btnReportes.addActionListener(e -> cardLayout.show(panelContenido, "Reportes"));
+		panelBotones.add(btnReportes);
+		
+        // Botón de Cerrar Sesión (Visible para todos)
+        btnCerrarSesion = new JButton("CERRAR SESIÓN");
+        btnCerrarSesion.setBounds(10, 560, 180, 45); 
+        btnCerrarSesion.addActionListener(e -> {
+            System.out.println("Cerrando Sesión...");
+            this.dispose(); 
+            // Aquí se llamaría a la LoginView
+        });
+        panelBotones.add(btnCerrarSesion);
+		
+		
+		// -------------------------------------------------------------------------
+		// A partir de aquí sigue el código de todas las vistas (Incidentes, Inventario, etc.)
+		// ************************************************************
+		// IMPORTANTE: Hacemos los paneles de vista internos (Incidentes, Inventario, etc.) transparentes
+		// si queremos ver el logo a través de ellos, o les ponemos un color de fondo si no.
+		// En este caso, **todos los paneles de vista internos deben ser transparentes**
+		// para que el logo se vea, **O** solo hacemos transparente el panel Dashboard.
+		// A continuación, se deja el fondo blanco por defecto en las vistas para mejor legibilidad.
+		// Solo se modifica el panelDashboard.
+		// -------------------------------------------------------------------------
+		
 		JPanel panelIncidentes = new JPanel();
 		panelContenido.add(panelIncidentes, "Incidentes");
-		panelIncidentes.setLayout(null);
+		panelIncidentes.setLayout(null); // Dejar con fondo
 
 		JLabel lblTituloIncidentesActCurso = new JLabel("Incidentes Activos en Curso");
 		lblTituloIncidentesActCurso.setFont(new Font("SansSerif", Font.BOLD, 15));
@@ -267,7 +391,7 @@ public class PanelPrincipal extends JFrame {
 
 		JPanel panelInventario = new JPanel();
 		panelContenido.add(panelInventario, "Inventario");
-		panelInventario.setLayout(null);
+		panelInventario.setLayout(null); // Dejar con fondo
 
 		JLabel lblTituloInventario = new JLabel("Gestión de Inventario y Suministros");
 		lblTituloInventario.setFont(new Font("SansSerif", Font.BOLD, 15));
@@ -305,7 +429,8 @@ public class PanelPrincipal extends JFrame {
 		spSuministros.setBounds(20, 89, 771, 480);
 		panelInventario.add(spSuministros);
 
-		tableSuministros = new JTable();
+		tableSuministros
+				= new JTable();
 		tableSuministros
 				.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "ID", "Suministro", "Stock Actual",
 						"Unidad (Kg/Uni)", "M\u00EDnimo Cr\u00EDtico", "Ubicaci\u00F3n", "Fecha de Caducidad" }));
@@ -325,7 +450,7 @@ public class PanelPrincipal extends JFrame {
 
 		JPanel panelBrigadistas = new JPanel();
 		panelContenido.add(panelBrigadistas, "Brigadistas");
-		panelBrigadistas.setLayout(null);
+		panelBrigadistas.setLayout(null); // Dejar con fondo
 
 		JLabel lblTituloBrigadista = new JLabel("Gestión de Brigadistas y Personal ");
 		lblTituloBrigadista.setFont(new Font("SansSerif", Font.BOLD, 15));
@@ -365,13 +490,11 @@ public class PanelPrincipal extends JFrame {
 		tableBrigadistas.setFont(new Font("SansSerif", Font.PLAIN, 12));
 		spBrigadistas.setViewportView(tableBrigadistas);
 
-		JPanel panelDetallesBrigadista = new JPanel(); // Cambiado de 'panel' a 'panelDetallesBrigadista' para mejor
-														// claridad
+		JPanel panelDetallesBrigadista = new JPanel();
 		panelDetallesBrigadista.setBounds(490, 90, 290, 500);
 		panelBrigadistas.add(panelDetallesBrigadista);
 		panelDetallesBrigadista.setLayout(null);
-		panelDetallesBrigadista.setBorder(new LineBorder(new Color(190, 190, 190), 1)); // <--- [FUNCIONALIDAD AÑADIDA]
-																						// Borde para estructurar
+		panelDetallesBrigadista.setBorder(new LineBorder(new Color(190, 190, 190), 1)); 
 
 		JLabel lblIdBrigadistas = new JLabel("ID: [ ID seleccionado ]");
 		lblIdBrigadistas.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -411,9 +534,9 @@ public class PanelPrincipal extends JFrame {
 
 		JPanel panelGuiasPAuxilios = new JPanel();
 		panelContenido.add(panelGuiasPAuxilios, "GuiasPAuxilios");
-		panelGuiasPAuxilios.setLayout(null);
+		panelGuiasPAuxilios.setLayout(null); // Dejar con fondo
 
-		JLabel lblTituloPrimerosAux = new JLabel("Biblioteca de Guías y Protocolos de  Auxilios");
+		JLabel lblTituloPrimerosAux = new JLabel("Biblioteca de Guías y Protocolos de  Auxilios");
 		lblTituloPrimerosAux.setFont(new Font("SansSerif", Font.BOLD, 15));
 		lblTituloPrimerosAux.setBounds(20, 11, 350, 25);
 		panelGuiasPAuxilios.add(lblTituloPrimerosAux);
@@ -474,9 +597,9 @@ public class PanelPrincipal extends JFrame {
 
 		JPanel panelReportes = new JPanel();
 		panelContenido.add(panelReportes, "Reportes");
-		panelReportes.setLayout(null);
+		panelReportes.setLayout(null); // Dejar con fondo
 
-		JLabel lblTituloReportes = new JLabel("Biblioteca de Guías y Protocolos de  Auxilios");
+		JLabel lblTituloReportes = new JLabel("Biblioteca de Guías y Protocolos de  Auxilios");
 		lblTituloReportes.setFont(new Font("SansSerif", Font.BOLD, 15));
 		lblTituloReportes.setBounds(20, 11, 400, 25);
 		panelReportes.add(lblTituloReportes);
@@ -510,9 +633,7 @@ public class PanelPrincipal extends JFrame {
 		lblReporteFechaFin.setBounds(30, 91, 100, 25);
 		panelPeriodoTipoReportes.add(lblReporteFechaFin);
 
-		// ************************************************************
-		// [CÓDIGO MANTENIDO] JFormattedTextFields con máscara para fechas
-		// ************************************************************
+		// JFormattedTextFields con máscara para fechas
 		try {
 			MaskFormatter mask = new MaskFormatter("##/##/####"); // DD/MM/AAAA
 			mask.setPlaceholderCharacter('_');
@@ -526,8 +647,6 @@ public class PanelPrincipal extends JFrame {
 			panelPeriodoTipoReportes.add(tfFechaFinReporte);
 
 		} catch (java.text.ParseException e) {
-			// FALLBACK CORREGIDO: Usamos JFormattedTextField() simple, manteniendo el tipo
-			// de dato.
 			tfFechaInicioReporte = new JFormattedTextField();
 			tfFechaInicioReporte.setBounds(140, 61, 220, 25);
 			panelPeriodoTipoReportes.add(tfFechaInicioReporte);
@@ -576,91 +695,47 @@ public class PanelPrincipal extends JFrame {
 		panelDashboard.setFont(new Font("SansSerif", Font.BOLD, 30));
 		panelContenido.add(panelDashboard, "Dashboard");
 		panelDashboard.setLayout(null);
+		// ************************************************************
+		// Hacemos el Dashboard transparente para ver el logo
+		// ************************************************************
+		panelDashboard.setOpaque(false); 
 
-		cardLayout.show(panelContenido, "Dashboard"); // Vista inicial
+		cardLayout.show(panelContenido, "Dashboard"); 
 
-		// ----------------------------------------------------
-		// 3. LISTENERS DE BOTONES (Conexión)
-		// ----------------------------------------------------
-
-		JButton btnDashboard = new JButton("Tablero");
-		btnDashboard.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnDashboard.setBounds(10, 21, 180, 40);
-		btnDashboard.addActionListener(e -> cardLayout.show(panelContenido, "Dashboard"));
-		panelBotones.add(btnDashboard);
-
-		JButton btnIncidentesActivos = new JButton("Incidentes Activos");
-		btnIncidentesActivos.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnIncidentesActivos.addActionListener(e -> cardLayout.show(panelContenido, "Incidentes"));
-		btnIncidentesActivos.setBounds(10, 72, 180, 40);
-		panelBotones.add(btnIncidentesActivos);
-
-		JButton btnInventarioSuministros = new JButton("Inventario Suministros");
-		btnInventarioSuministros.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnInventarioSuministros.setBounds(10, 123, 180, 40);
-		btnInventarioSuministros.addActionListener(e -> cardLayout.show(panelContenido, "Inventario"));
-		panelBotones.add(btnInventarioSuministros);
-
-		JButton btnBrigadistas = new JButton("Brigadistas");
-		btnBrigadistas.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnBrigadistas.setBounds(10, 174, 180, 40);
-		btnBrigadistas.addActionListener(e -> cardLayout.show(panelContenido, "Brigadistas"));
-		panelBotones.add(btnBrigadistas);
-
-		JButton btnGuiasPAuxilios = new JButton("Guias Primeros Auxilios");
-		btnGuiasPAuxilios.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnGuiasPAuxilios.setBounds(10, 225, 180, 40);
-		btnGuiasPAuxilios.addActionListener(e -> cardLayout.show(panelContenido, "GuiasPAuxilios"));
-		panelBotones.add(btnGuiasPAuxilios);
-
-		JButton btnReportes = new JButton("Reportes");
-		btnReportes.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnReportes.setBounds(10, 276, 180, 40);
-		btnReportes.addActionListener(e -> cardLayout.show(panelContenido, "Reportes"));
-		panelBotones.add(btnReportes);
-
-		// Footer (Añadido para completar la estructura 1000x700)
+		// Footer
 		JPanel panelFooter = new JPanel();
 		panelFooter.setBounds(0, 660, 1000, 40);
 		panelFondo.add(panelFooter);
+		panelFondo.setComponentZOrder(panelFooter, 0); // Lo ponemos al frente
 		panelFooter.setLayout(null);
 
-		lblEstadoFooter = new JLabel("Inicializando Sistema..."); // Usamos la variable declarada
+		lblEstadoFooter = new JLabel("Inicializando Sistema..."); 
 		lblEstadoFooter.setFont(new Font("SansSerif", Font.PLAIN, 12));
 		lblEstadoFooter.setBounds(10, 11, 500, 18);
 		panelFooter.add(lblEstadoFooter);
 
-		lblVersionFooter = new JLabel("Gestión de Emergencias v1.0.1 © 2025"); // Usamos la variable declarada
+		lblVersionFooter = new JLabel("Gestión de Emergencias v1.0.1 © 2025"); 
 		lblVersionFooter.setFont(new Font("SansSerif", Font.PLAIN, 12));
 		lblVersionFooter.setBounds(750, 11, 240, 18);
 		panelFooter.add(lblVersionFooter);
 
-		// ************************************************************
-		// [FUNCIONALIDAD MANTENIDA] Timer para simular sincronización en el Footer
-		// ************************************************************
+		// Timer para simular sincronización en el Footer
 		SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-
-		// El Timer se ejecutará cada 60,000 milisegundos (1 minuto)
 		Timer timer = new Timer(60000, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// Aquí se llamaría al método del Controlador para obtener la hora real
 				String horaActual = timeFormat.format(new Date());
-				// En la Vista, solo actualizamos el JLabel:
 				lblEstadoFooter.setText("✅ Sistema Listo | Última sincronización: " + horaActual);
-
-				// NOTA: Para actualizar 'Datos Cargados: X', se necesitaría un método público
-				// en esta Vista
-				// que el Controlador llamaría. Ejemplo: actualizarContadorIncidentes(int
-				// count);
 			}
 		});
 
-		// Ejecutar inmediatamente al inicio
 		lblEstadoFooter.setText("✅ Sistema Listo | Última sincronización: " + timeFormat.format(new Date()));
 		timer.start();
 
 		// --- Componentes del Dashboard (Se mantienen) ---
+		// NOTA: Para que el logo se vea, todos los paneles en Dashboard 
+		// que deberían ser transparentes, deben ser transparentes (setOpaque(false)).
+		// En este caso, dejamos los paneles de información opacos para mejor lectura.
 		JPanel panelIncidentesAbiertos = new JPanel();
 		panelIncidentesAbiertos.setBounds(20, 70, 250, 100);
 		panelDashboard.add(panelIncidentesAbiertos);
@@ -724,6 +799,56 @@ public class PanelPrincipal extends JFrame {
 				TitledBorder.TOP, null, null));
 		panelBrigadistasEspecialidad.setBounds(480, 190, 310, 200);
 		panelDashboard.add(panelBrigadistasEspecialidad);
-
+	}
+	
+	
+	// ************************************************************
+	// MÉTODO DE FILTRADO ELIMINADO. SOLO MANTENEMOS EL ESTILO.
+	// ************************************************************
+	
+	private void aplicarEstiloBotones() {
+	    // Estilo Común para todos los botones del menú (excepto Cerrar Sesión)
+	    JButton[] menuButtons = {
+	        btnDashboard, btnIncidentesActivos, btnInventarioSuministros,
+	        btnBrigadistas, btnGuiasPAuxilios, btnReportes
+	    };
+	    
+	    Color menuBgColor = COLOR_BOTON_MENU; 
+	    Color menuFgColor = Color.WHITE;
+	    Font menuFont = new Font("SansSerif", Font.BOLD, 12);
+	    Color hoverColor = COLOR_PRIMARIO_AZUL; 
+	    
+	    for (JButton btn : menuButtons) {
+	        btn.setFont(menuFont);
+	        btn.setBackground(menuBgColor);
+	        btn.setForeground(menuFgColor);
+	        btn.setBorderPainted(false); 
+	        btn.setFocusPainted(false);
+	        btn.setHorizontalAlignment(SwingConstants.LEFT); 
+	        btn.setOpaque(true); 
+	        
+	        // Listener de Mouse para un efecto de "Hover"
+	        btn.addMouseListener(new MouseAdapter() {
+	            Color original = menuBgColor;
+	            
+	            @Override
+	            public void mouseEntered(MouseEvent e) {
+	                btn.setBackground(hoverColor);
+	            }
+	            
+	            @Override
+	            public void mouseExited(MouseEvent e) {
+	                btn.setBackground(original); 
+	            }
+	        });
+	    }
+	    
+	    // Estilo Específico para el Botón de CERRAR SESIÓN (Rojo)
+	    btnCerrarSesion.setFont(new Font("SansSerif", Font.BOLD, 14));
+	    btnCerrarSesion.setBackground(COLOR_CERRAR_SESION); 
+	    btnCerrarSesion.setForeground(Color.WHITE);
+	    btnCerrarSesion.setBorderPainted(false);
+	    btnCerrarSesion.setFocusPainted(false);
+	    btnCerrarSesion.setOpaque(true); 
 	}
 }
