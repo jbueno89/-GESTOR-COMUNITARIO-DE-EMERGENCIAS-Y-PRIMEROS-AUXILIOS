@@ -44,6 +44,7 @@ import javax.swing.ImageIcon;
 import java.awt.Image; 
 import javax.swing.SwingConstants; 
 
+
 /**
  * Clase principal del panel de control de la aplicación.
  * Implementa un diseño con menú lateral (sidebar) y paneles de contenido 
