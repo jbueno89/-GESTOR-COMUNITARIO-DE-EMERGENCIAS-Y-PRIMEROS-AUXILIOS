@@ -1,0 +1,4 @@
+ID,Suministro,Stock Actual,Unidad,Mínimo Crítico,Ubicación,Fecha Caducidad,Critico
+1,Extintores,20,1,15,Almacén Principal,2027-08-11,
+2,jojo,4,6,4,Almacén Principal,2027-09-10,CRÍTICO
+3,jojojoj,5,5,6,Almacén Principal,2025-10-10,CRÍTICO
