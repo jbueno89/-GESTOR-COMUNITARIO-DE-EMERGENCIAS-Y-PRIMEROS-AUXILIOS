@@ -23,13 +23,19 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.AbstractListModel;
 import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
+
 // LIBRERÍAS AÑADIDAS PARA LAS FUNCIONALIDADES:
 import java.text.SimpleDateFormat;
 import javax.swing.Timer;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import javax.swing.text.MaskFormatter;
 import javax.swing.JFormattedTextField;
@@ -39,6 +45,7 @@ import javax.swing.ImageIcon; // Necesario para el logo
 import java.awt.Image; // Necesario para escalar el logo
 
 import servicio.BrigadistaService;
+import servicio.GuiaService;
 import servicio.IncidenteService;
 import controlador.BrigadistaController;
 import controlador.CrearIncidenteController;
@@ -50,10 +57,13 @@ import modelo.Suministro;
 import servicio.SuministroService;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.awt.Desktop;
 import java.util.List;
 import javax.swing.JTextPane;
+import javax.swing.UIManager;
 //Paquete de UI/Dialogs si creaste un diálogo para crear incidentes
 
 public class PanelPrincipal extends JFrame {
@@ -71,12 +81,6 @@ public class PanelPrincipal extends JFrame {
 	private JTextField tfBuscarBrigadistas;
 	private JTable tableBrigadistas;
 	private JTextField tfProtocolosPrimAux;
-
-	// Cambiamos JTextField por JFormattedTextField para las fechas (Ver Constructor)
-	private JFormattedTextField tfFechaInicioReporte;
-	private JFormattedTextField tfFechaFinReporte;
-
-	private JTable tableReportesResultPrevi;
 
 	// Declaramos los JLabels del Footer para poder actualizarlos
 	private JLabel lblEstadoFooter;
@@ -110,6 +114,9 @@ public class PanelPrincipal extends JFrame {
 	private JTextField tfEstadoActualPanel;
 	private JButton btnAsignarBrigadista;
 	private JButton btnDesasignarBrigadista;
+	private JButton btnAddGuiaPAuxili;
+	private JPanel panelGuiasPAuxilios;
+	private JButton btnQuitarGuiaPAuxili;
 
 	// si quieres ocultar también la caja (no requerida ahora)
 
@@ -164,6 +171,7 @@ public class PanelPrincipal extends JFrame {
 		panelFondo.setLayout(null);
 
 		JPanel panelBarra = new JPanel();
+		panelBarra.setBackground(new Color(204, 204, 204));
 		panelBarra.setBounds(0, 0, 1000, 40);
 		panelFondo.add(panelBarra);
 		panelBarra.setLayout(null);
@@ -203,6 +211,7 @@ public class PanelPrincipal extends JFrame {
 
 		// Lógica de Minimizar
 		JButton btnMinimizar = new JButton("-");
+		btnMinimizar.setBackground(new Color(255, 255, 255));
 		btnMinimizar.setBounds(885, 2, 50, 37);
 		btnMinimizar.setFont(new Font("SansSerif", Font.BOLD, 20));
 		btnMinimizar.addActionListener(new ActionListener() {
@@ -214,6 +223,7 @@ public class PanelPrincipal extends JFrame {
 
 		// Lógica de Cerrar
 		JButton btnCerrar = new JButton("x");
+		btnCerrar.setBackground(new Color(255, 255, 255));
 		btnCerrar.setBounds(937, 2, 53, 37);
 		btnCerrar.setFont(new Font("SansSerif", Font.BOLD, 15));
 		btnCerrar.addActionListener(new ActionListener() {
@@ -224,6 +234,7 @@ public class PanelPrincipal extends JFrame {
 		panelBarra.add(btnCerrar);
 
 		JLabel lblTitulo = new JLabel("Selfsecurity\r\n");
+		lblTitulo.setForeground(new Color(0, 0, 0));
 		lblTitulo.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 20));
 		lblTitulo.setBounds(49, 9, 128, 23);
 		panelBarra.add(lblTitulo);
@@ -242,6 +253,7 @@ public class PanelPrincipal extends JFrame {
 		});
 
 		JPanel panelBotones = new JPanel();
+		panelBotones.setBackground(new Color(204, 204, 204));
 		panelBotones.setFont(new Font("SansSerif", Font.BOLD, 12));
 		panelBotones.setBounds(0, 40, 200, 620);
 		panelFondo.add(panelBotones);
@@ -417,12 +429,12 @@ public class PanelPrincipal extends JFrame {
 		// Botones
 		btnAñadirSuministro = new JButton("Añadir Stock");
 		btnAñadirSuministro.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnAñadirSuministro.setBounds(520, 53, 120, 25);
+		btnAñadirSuministro.setBounds(671, 53, 120, 25);
 		panelInventario.add(btnAñadirSuministro);
 
 		btnReporteSuministro = new JButton("Generar Reporte");
 		btnReporteSuministro.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnReporteSuministro.setBounds(650, 53, 141, 25);
+		btnReporteSuministro.setBounds(520, 53, 141, 25);
 		panelInventario.add(btnReporteSuministro);
 
 		btnEditStockSuminis = new JButton("Editar Stock");
@@ -478,11 +490,58 @@ public class PanelPrincipal extends JFrame {
 		    new CrearSuministroDialog(this, suministroController, tableSuministros).setVisible(true);
 		});
 
-		// Botón Generar Reporte
 		btnReporteSuministro.addActionListener(e -> {
-		    List<Suministro> suministros = suministroController.getAllSuministros();
-		    ReporteService.generarYAbrirReporte(suministros, this);
+		    try {
+		        // Obtener los suministros actuales desde el controlador
+		        List<Suministro> suministros = suministroController.getAllSuministros();
+
+		        if (suministros.isEmpty()) {
+		            JOptionPane.showMessageDialog(this, "No hay suministros para generar el reporte.", "Aviso", JOptionPane.WARNING_MESSAGE);
+		            return;
+		        }
+
+		        // Ordenar por Ubicación y luego por Nombre
+		        suministros.sort((s1, s2) -> {
+		            int cmp = s1.getUbicacion().compareToIgnoreCase(s2.getUbicacion());
+		            return cmp != 0 ? cmp : s1.getNombre().compareToIgnoreCase(s2.getNombre());
+		        });
+
+		        // Seleccionar archivo CSV a guardar
+		        JFileChooser fileChooser = new JFileChooser();
+		        fileChooser.setSelectedFile(new java.io.File("ReporteSuministrosActivos.csv"));
+		        int seleccion = fileChooser.showSaveDialog(this);
+
+		        if (seleccion == JFileChooser.APPROVE_OPTION) {
+		            File archivo = fileChooser.getSelectedFile();
+
+		            try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo))) {
+		                // Encabezado CSV
+		                bw.write("ID,Nombre,Stock Actual,Unidad,Mínimo Crítico,Ubicación,Fecha Caducidad,Crítico\n");
+
+		                // Escribir cada suministro
+		                for (Suministro s : suministros) {
+		                    bw.write(String.format("%d,%s,%d,%s,%d,%s,%s,%s\n",
+		                            s.getId(),
+		                            s.getNombre(),
+		                            s.getStockActual(),
+		                            s.getUnidad(),
+		                            s.getMinimoCritico(),
+		                            s.getUbicacion(),
+		                            s.getFechaCaducidad(),
+		                            s.isCritico() ? "Sí" : "No"
+		                    ));
+		                }
+		            }
+
+		            JOptionPane.showMessageDialog(this, "Reporte de suministros generado correctamente en: " 
+		                                                + archivo.getAbsolutePath());
+		        }
+
+		    } catch (Exception ex) {
+		        JOptionPane.showMessageDialog(this, "Error al generar el reporte: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		    }
 		});
+
 
 		// Botón Editar Stock
 		btnEditStockSuminis.addActionListener(e -> abrirEditarSuministro());
@@ -828,7 +887,7 @@ public class PanelPrincipal extends JFrame {
 
 
 		// ------------------ PANEL GUIAS -----------------------
-		JPanel panelGuiasPAuxilios = new JPanel();
+		panelGuiasPAuxilios = new JPanel();
 		panelContenido.add(panelGuiasPAuxilios, "GuiasPAuxilios");
 		panelGuiasPAuxilios.setLayout(null);
 
@@ -848,192 +907,223 @@ public class PanelPrincipal extends JFrame {
 		tfProtocolosPrimAux.setBounds(120, 51, 300, 25);
 		panelGuiasPAuxilios.add(tfProtocolosPrimAux);
 
-		JComboBox cbFiltroCategPrimAux = new JComboBox();
-		cbFiltroCategPrimAux.setModel(new DefaultComboBoxModel(new String[] { "Trauma", "RCP", "Quemaduras" }));
-		cbFiltroCategPrimAux.setToolTipText("");
-		cbFiltroCategPrimAux.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		cbFiltroCategPrimAux.setBounds(450, 51, 120, 25);
-		panelGuiasPAuxilios.add(cbFiltroCategPrimAux);
-
 		JScrollPane spPrimerosAux = new JScrollPane();
-		spPrimerosAux.setBounds(20, 91, 250, 500);
+		spPrimerosAux.setBounds(20, 91, 614, 500);
 		panelGuiasPAuxilios.add(spPrimerosAux);
+		
+		// Servicio para persistencia
+		GuiaService guiaService = new GuiaService();
 
-		JList listProtocolosPrimAux = new JList();
-		listProtocolosPrimAux.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		listProtocolosPrimAux.setModel(new AbstractListModel() {
-			String[] values = new String[] { "Protocolo de Quemaduras", "Manejo de Fracturas" };
+		// Lista maestra que siempre contiene todos los PDFs
+		List<String> listaCompletaGuias = new ArrayList<>(guiaService.cargarLista());
 
-			public int getSize() {
-				return values.length;
-			}
+		// Modelo dinámico para el JList
+		DefaultListModel<String> listModel = new DefaultListModel<>();
+		listaCompletaGuias.forEach(listModel::addElement);
+		
+		// Cargar guías persistentes al iniciar
+		guiaService.cargarLista().forEach(listModel::addElement);
 
-			public Object getElementAt(int index) {
-				return values[index];
-			}
-		});
+		// ---------------------- JList con el modelo dinámico ----------------------
+		JList<String> listProtocolosPrimAux = new JList<>(listModel);
+		listProtocolosPrimAux.setFont(new Font("SansSerif", Font.BOLD | Font.ITALIC, 12));
 		spPrimerosAux.setViewportView(listProtocolosPrimAux);
 
-		JPanel panelVisualGuiaPrimAux = new JPanel();
-		panelVisualGuiaPrimAux.setBounds(280, 91, 511, 500);
-		panelGuiasPAuxilios.add(panelVisualGuiaPrimAux);
-		panelVisualGuiaPrimAux.setLayout(null);
+		// ---------------------- Acción para abrir PDF al hacer doble clic ----------------------
+		listProtocolosPrimAux.addMouseListener(new java.awt.event.MouseAdapter() {
+		    @Override
+		    public void mouseClicked(java.awt.event.MouseEvent evt) {
+		        if (evt.getClickCount() == 2) { // Detecta doble clic
+		            int index = listProtocolosPrimAux.getSelectedIndex();
+		            if (index >= 0) {
+		                String nombrePDF = listModel.getElementAt(index);
+		                File pdf = new File("guias/" + nombrePDF); // Carpeta donde guardas los PDFs
+		                if (pdf.exists()) {
+		                    try {
+		                        java.awt.Desktop.getDesktop().open(pdf); // Abre el PDF con el visor predeterminado
+		                    } catch (Exception ex) {
+		                        JOptionPane.showMessageDialog(null, "No se pudo abrir el PDF: " + ex.getMessage());
+		                    }
+		                } else {
+		                    JOptionPane.showMessageDialog(null, "El archivo no existe: " + nombrePDF);
+		                }
+		            }
+		        }
+		    }
+		});
+		
+		
+		btnAddGuiaPAuxili = new JButton("Añadir Guía");
+		btnAddGuiaPAuxili.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnAddGuiaPAuxili.setBounds(664, 51, 127, 25);
+		panelGuiasPAuxilios.add(btnAddGuiaPAuxili);
+		
+		btnAddGuiaPAuxili.addActionListener(e -> {
+		    JFileChooser fileChooser = new JFileChooser();
+		    fileChooser.setDialogTitle("Seleccionar guía PDF");
+		    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		    fileChooser.setAcceptAllFileFilterUsed(false);
+		    fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Archivos PDF", "pdf"));
 
-		JLabel lblTituloGuiaPrimAux = new JLabel("Título del Documento\r\n");
-		lblTituloGuiaPrimAux.setFont(new Font("SansSerif", Font.BOLD, 15));
-		lblTituloGuiaPrimAux.setBounds(10, 11, 491, 30);
-		panelVisualGuiaPrimAux.add(lblTituloGuiaPrimAux);
+		    int seleccion = fileChooser.showOpenDialog(this); // Centrar en la ventana actual
+		    if (seleccion == JFileChooser.APPROVE_OPTION) {
+		        File archivoSeleccionado = fileChooser.getSelectedFile();
 
-		JScrollPane spVisualGuiasPrimAux = new JScrollPane();
-		spVisualGuiasPrimAux.setBounds(10, 50, 491, 439);
-		panelVisualGuiaPrimAux.add(spVisualGuiasPrimAux);
+		        // Validar extensión .pdf
+		        if (!archivoSeleccionado.getName().toLowerCase().endsWith(".pdf")) {
+		            JOptionPane.showMessageDialog(this, "El archivo seleccionado no es un PDF.", "Error", JOptionPane.ERROR_MESSAGE);
+		            return;
+		        }
 
-		JEditorPane epVisualGuiasPrimAux = new JEditorPane();
-		spVisualGuiasPrimAux.setViewportView(epVisualGuiasPrimAux);
+		        try {
+		            // Crear carpeta "guias" si no existe
+		            File carpetaGuias = new File("guias");
+		            if (!carpetaGuias.exists()) {
+		                carpetaGuias.mkdirs();
+		            }
 
-		// ------------------ PANEL REPORTES -----------------------
-		JPanel panelReportes = new JPanel();
-		panelContenido.add(panelReportes, "Reportes");
-		panelReportes.setLayout(null);
+		            // Copiar archivo seleccionado a la carpeta "guias"
+		            File destino = new File(carpetaGuias, archivoSeleccionado.getName());
 
-		JLabel lblTituloReportes = new JLabel("Reportes");
-		lblTituloReportes.setFont(new Font("SansSerif", Font.BOLD, 15));
-		lblTituloReportes.setBounds(20, 11, 400, 25);
-		panelReportes.add(lblTituloReportes);
+		            // Evitar duplicados en la lista
+		            if (listModel.contains(destino.getName())) {
+		                JOptionPane.showMessageDialog(this, "La guía ya existe en la lista.", "Aviso", JOptionPane.WARNING_MESSAGE);
+		                return;
+		            }
 
-		JPanel panelPeriodoTipoReportes = new JPanel();
-		panelPeriodoTipoReportes.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		panelPeriodoTipoReportes.setBorder(
-				new TitledBorder(null, "Definir Periodo y Tipo", TitledBorder.LEFT, TitledBorder.TOP, null, null));
-		panelPeriodoTipoReportes.setBounds(20, 50, 370, 200);
-		panelReportes.add(panelPeriodoTipoReportes);
-		panelPeriodoTipoReportes.setLayout(null);
+		            java.nio.file.Files.copy(archivoSeleccionado.toPath(), destino.toPath(),
+		                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
-		JLabel lblTipoReporte = new JLabel("Tipo de Reporte :");
-		lblTipoReporte.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		lblTipoReporte.setBounds(30, 21, 100, 25);
-		panelPeriodoTipoReportes.add(lblTipoReporte);
+		            // Añadir nombre al modelo de la lista para que aparezca en el JList
+		            listModel.addElement(destino.getName());
 
-		JComboBox cbTipoReporte = new JComboBox();
-		cbTipoReporte.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		cbTipoReporte.setModel(new DefaultComboBoxModel(new String[] { "Incidentes", "Inventario", "Brigadistas" }));
-		cbTipoReporte.setBounds(140, 21, 220, 25);
-		panelPeriodoTipoReportes.add(cbTipoReporte);
+		            // Persistir la lista usando GuiaService
+		            GuiaService service = new GuiaService();
+		            service.guardarLista(Collections.list(listModel.elements()));
 
-		JLabel lblReporteFechaInicio = new JLabel("Fecha Inicio :");
-		lblReporteFechaInicio.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		lblReporteFechaInicio.setBounds(30, 61, 100, 25);
-		panelPeriodoTipoReportes.add(lblReporteFechaInicio);
+		            JOptionPane.showMessageDialog(this, "Guía añadida correctamente: " + destino.getName());
 
-		JLabel lblReporteFechaFin = new JLabel("Fecha Fin :");
-		lblReporteFechaFin.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		lblReporteFechaFin.setBounds(30, 91, 100, 25);
-		panelPeriodoTipoReportes.add(lblReporteFechaFin);
+		        } catch (Exception ex) {
+		            JOptionPane.showMessageDialog(this, "Error al añadir la guía: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		        }
+		    }
+		});
 
-		// ************************************************************
-		// JFormattedTextFields con máscara para fechas
-		// ************************************************************
-		try {
-			MaskFormatter mask = new MaskFormatter("##/##/####"); // DD/MM/AAAA
-			mask.setPlaceholderCharacter('_');
+		
+		btnQuitarGuiaPAuxili = new JButton("Quitar Guía");
+		btnQuitarGuiaPAuxili.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnQuitarGuiaPAuxili.setBounds(664, 89, 127, 25);
+		panelGuiasPAuxilios.add(btnQuitarGuiaPAuxili);
+		
+		btnQuitarGuiaPAuxili.addActionListener(e -> {
+		    int index = listProtocolosPrimAux.getSelectedIndex(); // Obtener índice seleccionado
+		    if (index < 0) {
+		        JOptionPane.showMessageDialog(this, "Seleccione una guía para quitar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+		        return;
+		    }
 
-			tfFechaInicioReporte = new JFormattedTextField(mask);
-			tfFechaInicioReporte.setBounds(140, 61, 220, 25);
-			panelPeriodoTipoReportes.add(tfFechaInicioReporte);
+		    String nombrePDF = listModel.getElementAt(index);
 
-			tfFechaFinReporte = new JFormattedTextField(mask);
-			tfFechaFinReporte.setBounds(140, 91, 220, 25);
-			panelPeriodoTipoReportes.add(tfFechaFinReporte);
+		    // Confirmar eliminación
+		    int confirm = JOptionPane.showConfirmDialog(this,
+		            "¿Desea eliminar la guía: " + nombrePDF + "?",
+		            "Confirmar eliminación",
+		            JOptionPane.YES_NO_OPTION);
 
-		} catch (java.text.ParseException e) {
-			tfFechaInicioReporte = new JFormattedTextField();
-			tfFechaInicioReporte.setBounds(140, 61, 220, 25);
-			panelPeriodoTipoReportes.add(tfFechaInicioReporte);
+		    if (confirm != JOptionPane.YES_OPTION) return; // Canceló la eliminación
 
-			tfFechaFinReporte = new JFormattedTextField();
-			tfFechaFinReporte.setBounds(140, 91, 220, 25);
-			panelPeriodoTipoReportes.add(tfFechaFinReporte);
+		    // Eliminar del modelo para actualizar el JList
+		    listModel.remove(index);
 
-			System.err.println("Error al aplicar la máscara de fecha. Usando JFormattedTextFields planos.");
-		}
+		    // Intentar eliminar archivo físico
+		    File pdf = new File("guias/" + nombrePDF);
+		    if (pdf.exists()) {
+		        try {
+		            if (!pdf.delete()) {
+		                JOptionPane.showMessageDialog(this, "No se pudo eliminar el archivo físico: " + nombrePDF,
+		                        "Error", JOptionPane.ERROR_MESSAGE);
+		            }
+		        } catch (SecurityException ex) {
+		            JOptionPane.showMessageDialog(this, "Error de seguridad al eliminar el archivo: " + ex.getMessage(),
+		                    "Error", JOptionPane.ERROR_MESSAGE);
+		        }
+		    }
 
-		JButton btnGenerarInfReporte = new JButton("Generar Informe");
-		btnGenerarInfReporte.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnGenerarInfReporte.setBounds(20, 261, 370, 40);
-		panelReportes.add(btnGenerarInfReporte);
+		    // Actualizar persistencia con GuiaService
+		    GuiaService service = new GuiaService();
+		    service.guardarLista(Collections.list(listModel.elements()));
+		});
+		
+		// ---------------------- Filtrado en la barra de búsqueda ----------------------
+		tfProtocolosPrimAux.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+		    private void filtrar() {
+		        String texto = tfProtocolosPrimAux.getText().trim().toLowerCase();
+		        listModel.clear();
+		        if (texto.isEmpty()) {
+		            // Mostrar todas las guías si no hay filtro
+		            listaCompletaGuias.forEach(listModel::addElement);
+		        } else {
+		            // Mostrar solo las guías que contienen el texto
+		            listaCompletaGuias.stream()
+		                    .filter(s -> s.toLowerCase().contains(texto))
+		                    .forEach(listModel::addElement);
+		        }
+		    }
 
-		JPanel panelResultPreviReporte = new JPanel();
-		panelResultPreviReporte.setBorder(new TitledBorder(null, "Resultados / Previsualización",
-				TitledBorder.LEFT, TitledBorder.TOP, null, null));
-		panelResultPreviReporte.setBounds(410, 50, 381, 460);
-		panelReportes.add(panelResultPreviReporte);
-		panelResultPreviReporte.setLayout(null);
-
-		JScrollPane spResultPreviReportes = new JScrollPane();
-		spResultPreviReportes.setBounds(10, 30, 361, 419);
-		panelResultPreviReporte.add(spResultPreviReportes);
-
-		tableReportesResultPrevi = new JTable();
-		tableReportesResultPrevi.setModel(new DefaultTableModel(new Object[][] {},
-				new String[] { "Nombre del Reporte", "Fecha de Creación", "Tipo", "Usuario" }));
-		tableReportesResultPrevi.getColumnModel().getColumn(0).setPreferredWidth(110);
-		tableReportesResultPrevi.getColumnModel().getColumn(1).setPreferredWidth(105);
-		spResultPreviReportes.setViewportView(tableReportesResultPrevi);
-
-		JButton btnDescargaReporte = new JButton("Descargar CSV");
-		btnDescargaReporte.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnDescargaReporte.setBounds(410, 520, 179, 40);
-		panelReportes.add(btnDescargaReporte);
-
-		JButton btnVerDetallesReporte = new JButton("Ver Detalles");
-		btnVerDetallesReporte.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnVerDetallesReporte.setBounds(610, 520, 181, 40);
-		panelReportes.add(btnVerDetallesReporte);
+		    @Override
+		    public void insertUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
+		    @Override
+		    public void removeUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
+		    @Override
+		    public void changedUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
+		});
 
 		cardLayout.show(panelContenido, "Dashboard");
 
 		JButton btnIncidentesActivos = new JButton("Incidentes Activos");
+		btnIncidentesActivos.setBackground(new Color(255, 255, 255));
+		btnIncidentesActivos.setForeground(new Color(0, 0, 0));
 		btnIncidentesActivos.setFont(new Font("SansSerif", Font.BOLD, 12));
 		btnIncidentesActivos.addActionListener(e -> cardLayout.show(panelContenido, "Incidentes"));
 		btnIncidentesActivos.setBounds(10, 11, 180, 40);
 		panelBotones.add(btnIncidentesActivos);
 
 		JButton btnInventarioSuministros = new JButton("Inventario Suministros");
+		btnInventarioSuministros.setBackground(new Color(255, 255, 255));
 		btnInventarioSuministros.setFont(new Font("SansSerif", Font.BOLD, 12));
 		btnInventarioSuministros.setBounds(10, 62, 180, 40);
 		btnInventarioSuministros.addActionListener(e -> cardLayout.show(panelContenido, "Inventario"));
 		panelBotones.add(btnInventarioSuministros);
 
 		JButton btnBrigadistas = new JButton("Brigadistas");
+		btnBrigadistas.setBackground(new Color(255, 255, 255));
 		btnBrigadistas.setFont(new Font("SansSerif", Font.BOLD, 12));
 		btnBrigadistas.setBounds(10, 113, 180, 40);
 		btnBrigadistas.addActionListener(e -> cardLayout.show(panelContenido, "Brigadistas"));
 		panelBotones.add(btnBrigadistas);
 
 		JButton btnGuiasPAuxilios = new JButton("Guias Primeros Auxilios");
+		btnGuiasPAuxilios.setBackground(new Color(255, 255, 255));
 		btnGuiasPAuxilios.setFont(new Font("SansSerif", Font.BOLD, 12));
 		btnGuiasPAuxilios.setBounds(10, 164, 180, 40);
 		btnGuiasPAuxilios.addActionListener(e -> cardLayout.show(panelContenido, "GuiasPAuxilios"));
 		panelBotones.add(btnGuiasPAuxilios);
 
-		JButton btnReportes = new JButton("Reportes");
-		btnReportes.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnReportes.setBounds(10, 215, 180, 40);
-		btnReportes.addActionListener(e -> cardLayout.show(panelContenido, "Reportes"));
-		panelBotones.add(btnReportes);
-
 		// Footer (Añadido para completar la estructura 1000x700)
 		JPanel panelFooter = new JPanel();
+		panelFooter.setBackground(new Color(204, 204, 204));
 		panelFooter.setBounds(0, 660, 1000, 40);
 		panelFondo.add(panelFooter);
 		panelFooter.setLayout(null);
 
-		lblEstadoFooter = new JLabel("Inicializando Sistema..."); // Usamos la variable declarada
+		lblEstadoFooter = new JLabel("Inicializando Sistema...");
+		lblEstadoFooter.setForeground(new Color(0, 0, 0));
 		lblEstadoFooter.setFont(new Font("SansSerif", Font.PLAIN, 12));
 		lblEstadoFooter.setBounds(10, 11, 500, 18);
 		panelFooter.add(lblEstadoFooter);
 
 		lblVersionFooter = new JLabel("Gestión de Emergencias v1.0.1 © 2025"); // Usamos la variable declarada
+		lblVersionFooter.setForeground(new Color(0, 0, 0));
 		lblVersionFooter.setFont(new Font("SansSerif", Font.PLAIN, 12));
 		lblVersionFooter.setBounds(750, 11, 240, 18);
 		panelFooter.add(lblVersionFooter);
@@ -1059,6 +1149,136 @@ public class PanelPrincipal extends JFrame {
 		// ========================= APLICAR REGLAS POR ROL ==========================
 		// Rol viene de VentanaRoles: "Coordinador", "Brigadista", "Usuario"
 		applyRoleRules(rol, panelIncidentes, panelInventario, panelBrigadistas);
+		
+		JButton btnGenerarReporteBrigad = new JButton("Generar Reporte");
+		btnGenerarReporteBrigad.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnGenerarReporteBrigad.setBounds(501, 52, 140, 25);
+		panelBrigadistas.add(btnGenerarReporteBrigad);
+		
+		btnGenerarReporteBrigad.addActionListener(e -> {
+		    try {
+		        DefaultTableModel model = (DefaultTableModel) tableBrigadistas.getModel();
+		        int rowCount = model.getRowCount();
+
+		        if (rowCount == 0) {
+		            JOptionPane.showMessageDialog(this, "No hay brigadistas activos en la tabla.", "Aviso", JOptionPane.WARNING_MESSAGE);
+		            return;
+		        }
+
+		        // Construir lista de brigadistas desde la tabla
+		        List<Brigadista> brigadistas = new ArrayList<>();
+		        for (int i = 0; i < rowCount; i++) {
+		            Brigadista b = new Brigadista();
+		            b.setId((int) model.getValueAt(i, 0));
+		            b.setNombre((String) model.getValueAt(i, 1));
+		            b.setEstado((String) model.getValueAt(i, 2));
+		            b.setEspecialidad((String) model.getValueAt(i, 3));
+		            b.setTelefono((String) model.getValueAt(i, 4));
+		            brigadistas.add(b);
+		        }
+
+		        // Ordenar primero por Estado (Libre → En Servicio → Descanso) y luego por Nombre
+		        brigadistas.sort((b1, b2) -> {
+		            List<String> ordenEstados = List.of("Libre", "En Servicio", "Descanso");
+		            int cmp = Integer.compare(
+		                    ordenEstados.indexOf(b1.getEstado()),
+		                    ordenEstados.indexOf(b2.getEstado())
+		            );
+		            return cmp != 0 ? cmp : b1.getNombre().compareToIgnoreCase(b2.getNombre());
+		        });
+
+		        // Elegir ubicación y nombre del archivo CSV
+		        JFileChooser fileChooser = new JFileChooser();
+		        fileChooser.setSelectedFile(new java.io.File("ReporteBrigadistasActivos.csv"));
+		        int seleccion = fileChooser.showSaveDialog(this);
+
+		        if (seleccion == JFileChooser.APPROVE_OPTION) {
+		            File archivo = fileChooser.getSelectedFile();
+
+		            try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo))) {
+		                // Encabezado CSV
+		                bw.write("ID,Nombre,Estado,Especialidad,Teléfono\n");
+
+		                // Escribir cada brigadista
+		                for (Brigadista b : brigadistas) {
+		                    bw.write(String.format("%d,%s,%s,%s,%s\n",
+		                            b.getId(),
+		                            b.getNombre(),
+		                            b.getEstado(),
+		                            b.getEspecialidad(),
+		                            b.getTelefono()
+		                    ));
+		                }
+		            }
+
+		            JOptionPane.showMessageDialog(this, "Reporte de brigadistas activos generado correctamente en: " 
+		                                                + archivo.getAbsolutePath());
+		        }
+
+		    } catch (Exception ex) {
+		        JOptionPane.showMessageDialog(this, "Error al generar el reporte: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		    }
+		});
+
+		JButton btnGenerarReporteIciden = new JButton("Generar Reporte");
+		btnGenerarReporteIciden.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnGenerarReporteIciden.setBounds(516, 52, 144, 25);
+		panelIncidentes.add(btnGenerarReporteIciden);
+		
+		btnGenerarReporteIciden.addActionListener(e -> {
+		    try {
+		        // Obtener todos los incidentes del archivo
+		        List<Incidente> incidentes = incidenteService.getAll(); // todo el .dat
+
+		        if (incidentes.isEmpty()) {
+		            JOptionPane.showMessageDialog(this, "No hay incidentes en el historial.", "Aviso", JOptionPane.WARNING_MESSAGE);
+		            return;
+		        }
+
+		        // Elegir ubicación y nombre del archivo a guardar
+		        JFileChooser fileChooser = new JFileChooser();
+		        fileChooser.setSelectedFile(new java.io.File("ReporteHistoricoIncidentes.csv"));
+		        int seleccion = fileChooser.showSaveDialog(this);
+
+		        if (seleccion == JFileChooser.APPROVE_OPTION) {
+		            File archivo = fileChooser.getSelectedFile();
+
+		            try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo))) {
+		                // Encabezado CSV
+		                bw.write("ID,Tipo,Prioridad,Ubicación,Responsable,TiempoActivo,Resuelto\n");
+
+		                // Función para escapar campos CSV
+		                java.util.function.Function<String, String> esc = campo -> {
+		                    if (campo == null) return "";
+		                    String valor = campo.replace("\"", "\"\""); // duplicar comillas internas
+		                    if (valor.contains(",") || valor.contains("\n") || valor.contains("\"")) {
+		                        valor = "\"" + valor + "\""; // envolver en comillas si contiene comas, saltos o comillas
+		                    }
+		                    return valor;
+		                };
+
+		                // Escribir cada incidente
+		                for (Incidente i : incidentes) {
+		                    bw.write(
+		                        i.getId() + "," +
+		                        esc.apply(i.getTipo()) + "," +
+		                        esc.apply(i.getPrioridad()) + "," +
+		                        esc.apply(i.getUbicacion()) + "," +
+		                        esc.apply(i.getNombreBrigadista()) + "," +
+		                        esc.apply(i.getTiempoActivo()) + "," +
+		                        (i.isResuelto() ? "Sí" : "No") + "\n"
+		                    );
+		                }
+		            }
+
+		            JOptionPane.showMessageDialog(this, "Reporte histórico generado correctamente en: " + archivo.getAbsolutePath());
+		        }
+
+		    } catch (Exception ex) {
+		        JOptionPane.showMessageDialog(this, "Error al generar el reporte: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		    }
+		});
+
 		
 		
 		// fin constructor
@@ -1138,6 +1358,12 @@ public class PanelPrincipal extends JFrame {
 	        }
 	        if (panelDetallesBrigadista != null) {
 	            panelBrigadistas.remove(panelDetallesBrigadista);
+	        }
+	        if (btnAddGuiaPAuxili != null) {
+				panelGuiasPAuxilios.remove(btnAddGuiaPAuxili);
+	        }
+	        if (btnQuitarGuiaPAuxili != null) {
+	        	panelGuiasPAuxilios.remove(btnQuitarGuiaPAuxili);
 	        }
 	    }
 
