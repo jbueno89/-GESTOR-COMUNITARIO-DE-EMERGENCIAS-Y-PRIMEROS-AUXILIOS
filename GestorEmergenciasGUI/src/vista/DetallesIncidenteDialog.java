@@ -29,7 +29,9 @@ public class DetallesIncidenteDialog extends JDialog {
         lblUbicacion.setBounds(20, 140, 300, 25);
         add(lblUbicacion);
 
-        JLabel lblBrigadista = new JLabel("Brigadista: " + incidente.getBrigadistaAsignado());
+        // Cambiado a nombreBrigadista según el nuevo modelo
+        JLabel lblBrigadista = new JLabel("Brigadista: " + 
+            (incidente.getNombreBrigadista().isEmpty() ? "N/A" : incidente.getNombreBrigadista()));
         lblBrigadista.setBounds(20, 180, 300, 25);
         add(lblBrigadista);
 
@@ -38,3 +40,4 @@ public class DetallesIncidenteDialog extends JDialog {
         add(lblTiempo);
     }
 }
+

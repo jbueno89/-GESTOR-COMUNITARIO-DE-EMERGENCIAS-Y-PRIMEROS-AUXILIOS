@@ -16,13 +16,15 @@ public class EditarSuministroDialog extends JDialog {
     private final SuministroController suministroController;
     private final JTable tableSuministros;
     private final Suministro suministro;
+    private final boolean esNuevo; // Indica si se trata de un suministro nuevo
 
     public EditarSuministroDialog(Window parent, SuministroController controller,
-                                  JTable table, Suministro suministro) {
-        super(parent, "Editar Suministro", ModalityType.APPLICATION_MODAL);
+                                  JTable table, Suministro suministro, boolean esNuevo) {
+        super(parent, esNuevo ? "Agregar Suministro" : "Editar Suministro", ModalityType.APPLICATION_MODAL);
         this.suministroController = controller;
         this.tableSuministros = table;
         this.suministro = suministro;
+        this.esNuevo = esNuevo;
 
         setSize(400, 400);
         setLocationRelativeTo(parent);
@@ -38,14 +40,15 @@ public class EditarSuministroDialog extends JDialog {
         lblUbicacion.setBounds(20, 190, 120, 25);
         add(lblUbicacion);
 
-        cbUbicacion = new JComboBox<>(new String[] {
+        cbUbicacion = new JComboBox<>(new String[]{
                 "Almacén Principal", "Almacén A", "Almacén B", "Almacén C"
         });
         cbUbicacion.setBounds(140, 190, 200, 25);
         cbUbicacion.setSelectedItem(suministro.getUbicacion());
         add(cbUbicacion);
 
-        tfFechaCaducidad = crearCampo("Fecha Caducidad (yyyy-MM-dd):", 230, suministro.getFechaCaducidad().toString());
+        tfFechaCaducidad = crearCampo("Fecha Caducidad (yyyy-MM-dd):", 230,
+                suministro.getFechaCaducidad() != null ? suministro.getFechaCaducidad().toString() : LocalDate.now().toString());
 
         // Botones
         btnGuardar = new JButton("Guardar");
@@ -55,6 +58,7 @@ public class EditarSuministroDialog extends JDialog {
         btnEliminar = new JButton("Eliminar");
         btnEliminar.setBounds(150, 280, 100, 30);
         add(btnEliminar);
+        btnEliminar.setVisible(!esNuevo); // Ocultar eliminar si es nuevo
 
         btnCancelar = new JButton("Cancelar");
         btnCancelar.setBounds(260, 280, 100, 30);
@@ -85,9 +89,15 @@ public class EditarSuministroDialog extends JDialog {
             suministro.setUbicacion((String) cbUbicacion.getSelectedItem());
             suministro.setFechaCaducidad(LocalDate.parse(tfFechaCaducidad.getText().trim(), DateTimeFormatter.ISO_LOCAL_DATE));
 
-            suministroController.actualizarSuministro(suministro);
-            suministroController.actualizarTabla(tableSuministros);
-            
+            // Ajustar crítico automáticamente
+            suministro.setCritico(suministro.getStockActual() <= suministro.getMinimoCritico());
+
+            if (esNuevo) {
+                suministroController.agregarSuministro(suministro, tableSuministros);
+            } else {
+                suministroController.actualizarSuministro(suministro, tableSuministros);
+            }
+
             dispose();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error al guardar los cambios. Verifique los datos.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -100,9 +110,11 @@ public class EditarSuministroDialog extends JDialog {
                 "Confirmar eliminación",
                 JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
-            suministroController.eliminarSuministro(suministro.getId());
-            suministroController.actualizarTabla(tableSuministros);
+            suministroController.eliminarSuministro(suministro.getId(), tableSuministros);
             dispose();
         }
     }
 }
+
+
+

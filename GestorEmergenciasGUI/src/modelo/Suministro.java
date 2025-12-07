@@ -53,5 +53,10 @@ public class Suministro implements Serializable {
     public void setMinimoCritico(int minimoCritico) { this.minimoCritico = minimoCritico; }
     public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
     public void setFechaCaducidad(LocalDate fechaCaducidad) { this.fechaCaducidad = fechaCaducidad; }
+    private boolean critico;
+
+    public boolean isCritico() { return critico; }
+    public void setCritico(boolean critico) { this.critico = critico; }
+
 }
 

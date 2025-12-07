@@ -7,14 +7,14 @@ import modelo.Incidente;
 
 public class CrearIncidenteController {
 
-    private IncidenteService incidenteService;
+    private final IncidenteService incidenteService;
 
-    // Constructor correcto
+    // Constructor
     public CrearIncidenteController(IncidenteService incidenteService) {
         this.incidenteService = incidenteService;
     }
 
-    // Método que pide tu PanelPrincipal
+    // Método para mostrar el diálogo de creación de incidente
     public void mostrarDialogoCrearIncidente(Window parent, Runnable callback) {
 
         CrearIncidenteDialog dialog = new CrearIncidenteDialog(parent);
@@ -27,10 +27,13 @@ public class CrearIncidenteController {
             String prioridad = dialog.getPrioridad();
             String ubicacion = dialog.getUbicacion();
 
-            Incidente nuevo = new Incidente(id, tipo, prioridad, ubicacion, "", "");
+            // Crear el incidente usando el constructor correcto (5 parámetros)
+            Incidente nuevo = new Incidente(id, tipo, prioridad, ubicacion, "");
+
+            // Agregar el incidente al servicio
             incidenteService.addIncidente(nuevo);
 
-            // Actualizar tabla en el PanelPrincipal
+            // Ejecutar callback para refrescar la tabla en el PanelPrincipal
             if (callback != null) {
                 callback.run();
             }
@@ -41,3 +44,4 @@ public class CrearIncidenteController {
         dialog.setVisible(true);
     }
 }
+

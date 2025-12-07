@@ -3,57 +3,129 @@ package servicio;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
 import modelo.Incidente;
+import modelo.Brigadista;
 
 public class IncidenteService {
 
     private List<Incidente> incidentes;
-    private final String RUTA_ARCHIVO = "incidentes.dat"; // Archivo donde se guardan los incidentes
+    private final String RUTA_ARCHIVO = "incidentes.dat";
 
-    public IncidenteService() {
-        incidentes = cargarIncidentes(); // Cargar al iniciar la aplicación
+    private BrigadistaService brigadistaService;
+
+    // Inyección del servicio de brigadistas (NO crear uno nuevo)
+    public IncidenteService(BrigadistaService brigadistaService) {
+        this.brigadistaService = brigadistaService;
+        this.incidentes = cargarIncidentes();
     }
 
-    // ---------- Obtener todos los incidentes ----------
     public List<Incidente> getAll() {
         return incidentes;
     }
 
-    // ---------- Añadir un incidente ----------
-    public void addIncidente(Incidente incidente) {
-        incidentes.add(incidente);
-        guardarIncidentes(); // Guardar cambios automáticamente
+    public int getNuevoId() {
+        if (incidentes.isEmpty()) return 1;
+
+        return incidentes.stream()
+                .mapToInt(Incidente::getId)
+                .max()
+                .orElse(0) + 1;
     }
 
-    // ---------- Actualizar un incidente existente ----------
+    // -----------------------------------------------------------
+    // AGREGAR INCIDENTE (NO asigna brigadista por defecto)
+    // -----------------------------------------------------------
+    public void addIncidente(Incidente incidente) {
+        // Garantizar que esté vacío
+        incidente.setIdBrigadista(0);
+        incidente.setNombreBrigadista("");
+        incidentes.add(incidente);
+        guardarIncidentes();
+    }
+
+    // -----------------------------------------------------------
+    // ACTUALIZAR INCIDENTE
+    // -----------------------------------------------------------
     public void actualizarIncidente(Incidente incidente) {
         for (int i = 0; i < incidentes.size(); i++) {
             if (incidentes.get(i).getId() == incidente.getId()) {
-                incidentes.set(i, incidente); // Reemplazar el incidente por el actualizado
+                incidentes.set(i, incidente);
                 break;
             }
         }
         guardarIncidentes();
     }
 
-    // ---------- Marcar un incidente como resuelto ----------
+    // -----------------------------------------------------------
+    // MARCAR INCIDENTE COMO RESUELTO
+    // -----------------------------------------------------------
     public void marcarComoResuelto(int id) {
         for (Incidente i : incidentes) {
             if (i.getId() == id) {
                 i.setResuelto(true);
+                i.setTiempoActivo("Finalizado");
+
+                // Liberar brigadista si estaba asignado
+                if (i.getIdBrigadista() != 0) {
+                    Brigadista b = brigadistaService.buscarPorId(i.getIdBrigadista());
+                    if (b != null) {
+                        b.setEstado("Libre");
+                        brigadistaService.updateBrigadista(b);
+                    }
+                }
+
+                // Limpiar asignación
+                i.setIdBrigadista(0);
+                i.setNombreBrigadista("");
                 break;
             }
         }
-        guardarIncidentes(); // Guardar cambios automáticamente
+        guardarIncidentes();
     }
 
-    // ---------- Eliminar un incidente ----------
+    // -----------------------------------------------------------
+    // ELIMINAR INCIDENTE
+    // -----------------------------------------------------------
     public void eliminarIncidente(int id) {
         incidentes.removeIf(i -> i.getId() == id);
-        guardarIncidentes(); // Guardar cambios automáticamente
+        guardarIncidentes();
     }
 
-    // ---------- Guardar lista en archivo (.dat) ----------
+    // -----------------------------------------------------------
+    // DESASIGNAR BRIGADISTA
+    // -----------------------------------------------------------
+    public void desasignarBrigadistaDeIncidente(int idIncidente) {
+        Incidente inc = buscarPorId(idIncidente);
+        if (inc != null) {
+            // Liberar brigadista si estaba asignado
+            if (inc.getIdBrigadista() != 0) {
+                Brigadista b = brigadistaService.buscarPorId(inc.getIdBrigadista());
+                if (b != null) {
+                    b.setEstado("Libre");
+                    brigadistaService.updateBrigadista(b);
+                }
+            }
+
+            inc.setIdBrigadista(0);
+            inc.setNombreBrigadista("");
+            guardarIncidentes();
+        }
+    }
+
+    // -----------------------------------------------------------
+    // BUSCAR INCIDENTE POR ID
+    // -----------------------------------------------------------
+    public Incidente buscarPorId(int id) {
+        for (Incidente i : incidentes) {
+            if (i.getId() == id) return i;
+        }
+        return null;
+    }
+
+    // -----------------------------------------------------------
+    // GUARDAR INCIDENTES EN ARCHIVO
+    // -----------------------------------------------------------
     private void guardarIncidentes() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(RUTA_ARCHIVO))) {
             oos.writeObject(incidentes);
@@ -62,18 +134,20 @@ public class IncidenteService {
         }
     }
 
-    // ---------- Cargar lista desde archivo (.dat) ----------
+    // -----------------------------------------------------------
+    // CARGAR INCIDENTES DESDE ARCHIVO
+    // -----------------------------------------------------------
     @SuppressWarnings("unchecked")
     private List<Incidente> cargarIncidentes() {
         File archivo = new File(RUTA_ARCHIVO);
         if (!archivo.exists()) {
-            return new ArrayList<>(); // No hay archivo, iniciar lista vacía
+            return new ArrayList<>();
         }
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivo))) {
             return (List<Incidente>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            return new ArrayList<>(); // En caso de error, lista vacía
+            return new ArrayList<>();
         }
     }
 }
