@@ -1,3 +1,11 @@
+/*
+ * ***************************************************************
+ * GRUPO 10
+ * GESTOR COMUNITARIO DE EMERGENCIAS Y PRIMEROS AUXILIOS
+ * Jose Miguel Bueno Martinez - 20251020093
+ * Anyelo Esteban Casas Zapata - 20251020106
+ * ***************************************************************
+ */
 package vista;
 
 import java.awt.EventQueue;
@@ -64,8 +72,19 @@ import java.awt.Desktop;
 import java.util.List;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
-//Paquete de UI/Dialogs si creaste un diálogo para crear incidentes
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.time.LocalDate;
 
+/**
+ * Clase principal de la aplicación, actúa como la **Vista Maestra** en el patrón MVC.
+ * Contiene la estructura principal de la interfaz (barra de título, menú lateral y área de contenido)
+ * y gestiona el cambio entre las diferentes vistas funcionales (Incidentes, Inventario, Brigadistas)
+ * mediante un {@link CardLayout}.
+ * Inicializa todos los {@link Servicio}s y {@link Controlador}es necesarios.
+ * * @author Jose Miguel Bueno Martinez
+ * @author Anyelo Esteban Casas Zapata
+ */
 public class PanelPrincipal extends JFrame {
 
 	private static final long serialVersionUID = 1L;
